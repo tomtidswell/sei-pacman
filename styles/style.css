@@ -1,0 +1,48 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+div.grid {
+  width: 630px;
+  display: flex;
+  flex-wrap: wrap;
+  color: lightgrey;
+}
+
+div.grid-item {
+  width: 35px;
+  height: 35px;
+  border: 1px solid white;
+}
+
+div.grid-item.wall{
+  border-radius: 5px;
+}
+
+div.grid-item.wall {
+  background-color: #a700c7;
+  color: #a700c7;
+}
+div.grid-item.binky {
+  background-image: url('../assets/pinky-sprite.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+div.grid-item.player {
+  background-image: url('../assets/pacman-sprite.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+}

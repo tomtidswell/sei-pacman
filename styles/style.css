@@ -35,6 +35,10 @@ div.grid-item.wall {
   background-color: #a700c7;
   color: #a700c7;
 }
+div.grid-item.prison {
+  background-color: #222222;
+  color: #555555;
+}
 div.grid-item.pinky {
   background-image: url('../assets/pinky-sprite.png');
   background-repeat: no-repeat;

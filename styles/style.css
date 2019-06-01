@@ -12,6 +12,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.5em;
 }
 
 div.grid {
@@ -51,38 +52,51 @@ div.grid-item.binky {
 }
 
 div.grid-item.pacman {
-  background-image: url('../assets/pacman-sprite.png');
-  background-repeat: no-repeat;
-  background-size: contain;
+  background-color: #ffd915;
+  border-radius: 50%;
+  clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);
 }
 div.grid-item.pacman.right {
-  animation: 0.5s slideRight;
+  transform: rotate(0deg);
+  animation: 0.3s linear slideRight;
 }
 div.grid-item.pacman.down {
   transform: rotate(90deg);
-  animation: 0.5s slideDown;
+  animation: 0.3s linear slideDown;
 }
 div.grid-item.pacman.left {
   transform: rotate(180deg);
-  animation: 0.5s slideLeft;
+  animation: 0.3s linear slideLeft;
 }
 div.grid-item.pacman.up {
   transform: rotate(270deg);
-  animation: 0.5s slideUp;
+  animation: 0.3s linear slideUp;
 }
 @keyframes slideRight {
-  from { transform: translateX(-34px) rotate(0deg); }
-  to   { transform: translateX(0) rotate(0deg); }
+  0% {  transform: translateX(-34px) rotate(0deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  100%{ transform: translateX(0) rotate(0deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideDown {
-  from { transform: translateY(-34px) rotate(90deg); }
-  to   { transform: translateY(0) rotate(90deg); }
+  0% {  transform: translateY(-34px) rotate(90deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  100%{ transform: translateY(0) rotate(90deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideLeft {
-  from { transform: translateX(+34px) rotate(180deg); }
-  to   { transform: translateX(0) rotate(180deg); }
+  0% {  transform: translateX(+34px) rotate(180deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  100%{ transform: translateX(0) rotate(180deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideUp {
-  from { transform: translateY(34px) rotate(270deg); }
-  to   { transform: translateY(0) rotate(270deg); }
+  0% {  transform: translateY(34px) rotate(270deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  100%{ transform: translateY(0) rotate(270deg);
+        clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }

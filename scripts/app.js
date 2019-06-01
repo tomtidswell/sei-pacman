@@ -3,6 +3,7 @@ const squares = []
 let pacman = null
 let binky = null
 let pinky = null
+let gameLost = false
 
 const walls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 35, 38, 39, 41, 42, 43, 46, 47, 48, 50, 51, 54, 57, 59, 61, 64, 66, 68, 71, 72, 73, 74, 75, 79, 82, 86, 87, 88, 89, 90, 95, 102, 107, 108, 110, 111, 113, 114, 116, 117, 119, 120, 122, 123, 125, 144, 145, 146, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 160, 161, 168, 169, 170, 171, 172, 173, 180, 182, 183, 184, 186, 187, 188, 189, 190, 191, 193, 194, 195, 197, 198, 204, 205, 208, 209, 215, 216, 218, 219, 220, 229, 230, 231, 233, 234, 242, 243, 251, 252, 254, 255, 256, 258, 259, 260, 261, 262, 263, 265, 266, 267, 269, 270, 273, 278, 279, 284, 287, 288, 294, 299, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323]
 
@@ -45,6 +46,9 @@ function init() {
 }
 
 function handleKeyDown(e){
+  //dont do anything if the game is already lost
+  if(gameLost) return
+  //apply the new direction into pacmans direction parameter so it can be picked up next interval
   switch (e.key) {
     case 'ArrowRight':
       pacman.direction = rightMove(pacman.location) ? 'right' : pacman.direction
@@ -87,6 +91,12 @@ function downMove(currentSquare){
   return currentSquare + width
 }
 
+function initiateLoss(){
+  pacman.stopMoving()
+  pinky.stopMoving()
+  binky.stopMoving()
+}
+
 
 
 function moveSprite(spriteClass, spriteIndex, spriteVariant){
@@ -107,13 +117,14 @@ class Player {
     this.intId = null
     this.direction = null
     this.availableMoves = {}
+    this.isDead = false
     moveSprite(this.name, this.location, 'start')
   }
   startMoving(){
     if(!this.intId){
-      this.intId = setInterval( ()=>this.move(), 450)
+      this.intId = setInterval( ()=>this.move(), 300)
+      this.move()
     }
-    this.move()
   }
   stopMoving(){
     clearInterval(this.intId)
@@ -250,35 +261,10 @@ class Ghost{
       this.square = this.availableMoves[possibleMoves[Math.floor(Math.random()*possibleMoves.length)]]
       moveSprite(this.name,this.square,'right')
     }
+    //finally check to see if that move killed pacman
+    if(this.killedPacman()) initiateLoss()
   }
-  moveBackup(){
-    //first fetch a new direction bias to influence the direction of travel for this step
-    this.directionBias()
-
-    //now decide which direction to move into
-    let newSquare = null
-    let x = 3 // a brake to ensure we dont end up in an infinite loop for this step. It means we have 5 attempts at finding
-    while(!newSquare && x > 0){
-      //will loop through
-      const direction = this.allDirections[Math.floor(Math.random()*this.allDirections.length)]
-      switch(direction) {
-        case 'right':
-          newSquare = rightMove(this.square)
-          break
-        case 'left':
-          newSquare = leftMove(this.square)
-          break
-        case 'up':
-          newSquare = upMove(this.square)
-          break
-        case 'down':
-          newSquare = downMove(this.square)
-          break
-      }
-      x--
-    }
-    if(x===0) console.log(`${this.name}: skipping move, I'm stuck!`)
-    if(newSquare) this.square = newSquare
-    moveSprite(this.name,this.square)
+  killedPacman(){
+    return this.square === pacman.location
   }
 }

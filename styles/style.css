@@ -50,8 +50,39 @@ div.grid-item.binky {
   background-size: contain;
 }
 
-div.grid-item.player {
+div.grid-item.pacman {
   background-image: url('../assets/pacman-sprite.png');
   background-repeat: no-repeat;
   background-size: contain;
+}
+div.grid-item.pacman.right {
+  animation: 0.5s slideRight;
+}
+div.grid-item.pacman.down {
+  transform: rotate(90deg);
+  animation: 0.5s slideDown;
+}
+div.grid-item.pacman.left {
+  transform: rotate(180deg);
+  animation: 0.5s slideLeft;
+}
+div.grid-item.pacman.up {
+  transform: rotate(270deg);
+  animation: 0.5s slideUp;
+}
+@keyframes slideRight {
+  from { transform: translateX(-34px) rotate(0deg); }
+  to   { transform: translateX(0) rotate(0deg); }
+}
+@keyframes slideDown {
+  from { transform: translateY(-34px) rotate(90deg); }
+  to   { transform: translateY(0) rotate(90deg); }
+}
+@keyframes slideLeft {
+  from { transform: translateX(+34px) rotate(180deg); }
+  to   { transform: translateX(0) rotate(180deg); }
+}
+@keyframes slideUp {
+  from { transform: translateY(34px) rotate(270deg); }
+  to   { transform: translateY(0) rotate(270deg); }
 }

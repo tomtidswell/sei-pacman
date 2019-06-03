@@ -106,6 +106,7 @@ function moveSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
     if(square.classList.contains(spriteClass))
       square.classList.remove(spriteClass, 'right', 'left', 'up', 'down')
   })
+  console.log(spriteClass, spriteVariant)
   squares[spriteIndex].classList.add(spriteClass, spriteVariant)
   if(spriteVariant2) squares[spriteIndex].classList.add(spriteVariant2)
 }
@@ -167,12 +168,10 @@ class Player {
   }
   eat(){
     if(this.location === this.previousLocation) return
-
-    const eatPill = squares[this.location].classList.contains('pill')
-    squares[this.location].classList.remove('pill')
-    squares[this.location].innerHTML = ''
-    console.log(squares[this.location].classList)
-
+    const pill = squares[this.location].classList.contains('pill') && !squares[this.location].classList.contains('eaten')
+    if(pill){
+      squares[this.location].classList.add('eaten')
+    }
   }
   checkDead(){
     ghosts.forEach(ghost => {
@@ -267,7 +266,7 @@ class Ghost{
         initiateLoss()
       } else {
         //move to the square, by moving the sprite
-        moveSprite(this.name, this.square, 'right')
+        moveSprite(this.name, this.square, this.direction)
       }
     }
   }

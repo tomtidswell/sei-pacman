@@ -13,6 +13,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 0.5em;
+  background-color: black;
 }
 
 div.grid {
@@ -22,10 +23,21 @@ div.grid {
   color: lightgrey;
 }
 
+div.grid-item.pill:after{
+  content: '';
+  position: relative;
+  top:50%;
+  left: 50%;
+  display: block;
+  width: 4px;
+  height: 4px;
+  background-color: green;
+}
+
 div.grid-item {
   width: 35px;
   height: 35px;
-  border: 1px solid white;
+  border: 1px solid #111111;
 }
 
 div.grid-item.wall{
@@ -37,19 +49,24 @@ div.grid-item.wall {
   color: #a700c7;
 }
 div.grid-item.prison {
-  background-color: #222222;
-  color: #555555;
+  background-color: #444444;
+  color: #666666;
 }
 div.grid-item.pinky {
-  background-image: url('../assets/pinky-sprite.png');
+  background-image: url('../assets/pinky.gif');
   background-repeat: no-repeat;
   background-size: contain;
 }
 div.grid-item.binky {
-  background-image: url('../assets/pinky-sprite.png');
+  background-image: url('../assets/blinky.gif');
   background-repeat: no-repeat;
   background-size: contain;
 }
+div.grid-item.binky.hidden, div.grid-item.pinky.hidden {
+  /* background-image: none; */
+}
+
+
 
 div.grid-item.pacman {
   background-color: #ffd915;
@@ -72,6 +89,13 @@ div.grid-item.pacman.up {
   transform: rotate(270deg);
   animation: 0.3s linear slideUp;
 }
+div.grid-item.pacman.dead {
+  animation: 1s linear dead;
+  background-color: inherit;
+  transition: background-color 1s step-end;
+}
+
+
 @keyframes slideRight {
   0% {  transform: translateX(-34px) rotate(0deg);
         clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
@@ -99,4 +123,10 @@ div.grid-item.pacman.up {
   50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   100%{ transform: translateY(0) rotate(270deg);
         clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+}
+@keyframes dead {
+  0% {  clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
+  33%{  clip-path: polygon(100% 0, 50% 50%, 100% 100%, 0 100%, 0 0);}
+  66%{  clip-path: polygon(0 0, 50% 50%, 0 100%, 0 100%, 0 0);}
+  100%{ clip-path: polygon(0 50%, 50% 50%, 0 50%, 0 50%, 0 50%);}
 }

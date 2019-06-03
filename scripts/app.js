@@ -115,6 +115,7 @@ window.addEventListener('DOMContentLoaded', init)
 class Player {
   constructor(name,index){
     this.location = index
+    this.previousLocation = null
     this.name = name
     this.intId = null
     this.direction = null
@@ -127,8 +128,12 @@ class Player {
     if(this.dead) return
     //dont allow to start moving if there is already a timer running
     if(!this.intId){
-      this.intId = setInterval( ()=> this.move(), 300)
+      this.intId = setInterval( ()=>{
+        this.move()
+        this.eat()
+      }, 300)
       this.move()
+      this.eat()
     }
   }
   stopMoving(){
@@ -136,6 +141,9 @@ class Player {
     this.intId = null
   }
   move(){
+    //set the location history
+    this.previousLocation = this.location
+
     //potential moves of the sprite
     this.availableMoves.right = rightMove(this.location)
     this.availableMoves.left = leftMove(this.location)
@@ -155,7 +163,16 @@ class Player {
     }
     //check if pacman should die in the new location, if so, dont move there
     this.checkDead()
-    if(!this.dead) moveSprite('pacman', this.location, pacman.direction)
+    if(!this.dead && this.location !== this.previousLocation) moveSprite('pacman', this.location, pacman.direction)
+  }
+  eat(){
+    if(this.location === this.previousLocation) return
+
+    const eatPill = squares[this.location].classList.contains('pill')
+    squares[this.location].classList.remove('pill')
+    squares[this.location].innerHTML = ''
+    console.log(squares[this.location].classList)
+
   }
   checkDead(){
     ghosts.forEach(ghost => {

@@ -45,9 +45,14 @@ function init() {
 
 
   pacman = new Player('pacman',135)
-  ghosts.push(new Ghost('binky',206))
-  ghosts.push(new Ghost('pinky',207))
-  ghosts.forEach(ghost => ghost.startMoving())
+  ghosts.push(new Ghost('binky',189))
+  ghosts.push(new Ghost('pinky',188))
+
+  for(var i = 0; i < ghosts.length; i++){
+    const currentGhost = ghosts[i]
+    setTimeout( ()=> currentGhost.startMoving(), (i+1)*1000)
+  }
+
   paintDecoration()
   window.addEventListener('keydown',handleKeyDown)
 }
@@ -101,12 +106,14 @@ function initiateLoss(){
   //TODO further loss functionality, scoreboard, message etc
 }
 
-function moveSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
-  squares.forEach(square => {
-    if(square.classList.contains(spriteClass))
-      square.classList.remove(spriteClass, 'right', 'left', 'up', 'down')
-  })
-  console.log(spriteClass, spriteVariant)
+function removeSprite(spriteClass, spriteIndex){
+  //for the first step, there will not be an old sprite to remove
+  if(!spriteIndex) return
+  squares[spriteIndex].classList.remove(spriteClass, `${spriteClass}-left`, `${spriteClass}-right`, `${spriteClass}-up`, `${spriteClass}-down`)
+}
+
+function addSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
+  //console.log(spriteClass, spriteVariant, spriteVariant2)
   squares[spriteIndex].classList.add(spriteClass, spriteVariant)
   if(spriteVariant2) squares[spriteIndex].classList.add(spriteVariant2)
 }
@@ -122,7 +129,7 @@ class Player {
     this.direction = null
     this.availableMoves = {}
     this.dead = false
-    moveSprite(this.name, this.location, 'start')
+    addSprite(this.name, this.location, 'start')
   }
   startMoving(){
     //dont allow pacman to move if he is dead
@@ -164,7 +171,10 @@ class Player {
     }
     //check if pacman should die in the new location, if so, dont move there
     this.checkDead()
-    if(!this.dead && this.location !== this.previousLocation) moveSprite('pacman', this.location, pacman.direction)
+    if(!this.dead && this.location !== this.previousLocation){
+      addSprite(this.name, this.location, `${this.name}-${this.direction}`)
+      removeSprite(this.name, this.previousLocation)
+    }
   }
   eat(){
     if(this.location === this.previousLocation) return
@@ -195,18 +205,22 @@ class Ghost{
     this.square = square
     this.bias = []
     this.allDirections = ['up','right','down','left']
-    this.direction = null
+    this.direction = 'down'
     this.intId = null
     this.stepCounter = 0
     this.stepHistory = []
     this.availableMoves = {}
     this.mode = {}
     this.killer = false
+    this.stepHistory.push(square)
+    //draw the ghost
+    addSprite(this.name, this.square)
+    //start the ghost in obstacle mode to navigate out of the prison
+    this.modeSwitch('obstacle')
   }
   startMoving(){
     if(!this.intId){
       this.intId = setInterval( ()=>this.move(), 700)
-      moveSprite(this.name,this.square,'right')
     }
   }
   stopMoving(){
@@ -266,7 +280,9 @@ class Ghost{
         initiateLoss()
       } else {
         //move to the square, by moving the sprite
-        moveSprite(this.name, this.square, this.direction)
+        addSprite(this.name, this.square, `${this.name}-${this.direction}`)
+        //we just added the new location to the history, remove the old sprite from history position #1
+        removeSprite(this.name, this.stepHistory[1])
       }
     }
   }
@@ -332,11 +348,7 @@ class Ghost{
     //console.log('OPERATING IN OBSTACLE MODE')
 
     //to move in an anticlocwise direction, we need to identify the last direction of travel and choose the first available direction an index before our previous direction
-    let anticlockwiseDirections = []
-    if (this.direction === 'down') anticlockwiseDirections = ['right','down','left','up']
-    if (this.direction === 'right') anticlockwiseDirections = ['up','right','down','left']
-    if (this.direction === 'up') anticlockwiseDirections = ['left','up','right','down']
-    if (this.direction === 'left') anticlockwiseDirections = ['down','left','up','right']
+    const anticlockwiseDirections = this.anticlockwiseDirections(this.direction)
 
     //the array items are listed in anticlockwise order, so find the first index that is allowed
     const direction = anticlockwiseDirections.find(direction => this.availableMoves[direction])
@@ -362,6 +374,12 @@ class Ghost{
       case 'right': return 'left'
     }
   }
+  anticlockwiseDirections(direction){
+    if (direction === 'down') return ['right','down','left','up']
+    if (direction === 'right') return ['up','right','down','left']
+    if (direction === 'up') return ['left','up','right','down']
+    if (direction === 'left') return ['down','left','up','right']
+  }
   calcMode(){
     //if there is a mode defined, and it should end this turn, end it
     if(this.mode.name && this.mode.ends === this.stepCounter){
@@ -376,9 +394,12 @@ class Ghost{
     if(!this.mode.name){
       this.mode.name = mode
       this.mode.started = this.stepCounter
-      this.mode.ends = this.stepCounter + 3
+      this.mode.ends = this.stepCounter + 5
     }
     //TODO: future modes
     //case 'poison': this.mode = 'poison'
+  }
+  moveGhostSprite(){
+
   }
 }

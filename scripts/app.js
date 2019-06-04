@@ -1,14 +1,37 @@
 const width = 18
 const squares = []
-let pacman = null
 const ghosts = []
+let pacman = null
 let gameLost = false
+let scoreboard = null
 
 const walls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 35, 38, 39, 41, 42, 43, 46, 47, 48, 50, 51, 54, 57, 59, 61, 64, 66, 68, 71, 72, 73, 74, 75, 79, 82, 86, 87, 88, 89, 90, 95, 102, 107, 108, 110, 111, 113, 114, 116, 117, 119, 120, 122, 123, 125, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 168, 169, 170, 171, 172, 173, 180, 182, 183, 184, 186, 187, 188, 189, 190, 191, 193, 194, 195, 197, 198, 204, 205, 208, 209, 215, 216, 218, 219, 220, 229, 230, 231, 233, 234, 242, 243, 251, 252, 254, 255, 256, 258, 259, 260, 261, 262, 263, 265, 266, 267, 269, 270, 273, 278, 279, 284, 287, 288, 294, 299, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323]
 
 const prison = [169, 170, 171, 172, 187, 188, 189, 190]
 
+function init() {
+  paintGrid('.grid')
+  pacman = new Player('pacman',135)
+  ghosts.push(new Ghost('binky',189,1000))
+  ghosts.push(new Ghost('pinky',188,3000))
+  scoreboard = new ScoreboardDefinition('.scoreboard')
+  paintDecoration()
+  window.addEventListener('keydown',handleKeyDown)
+}
 
+function paintGrid(gridClass){
+  //grab the parent div for the Grid
+  const grid = document.querySelector(gridClass)
+  //create the grid with width*width number of squares
+  for (let i = 0; i < width * width; i++) {
+    const square = document.createElement('div')
+    square.classList.add('grid-item')
+    //square.innerText = i
+    square.addEventListener('click', e => e.target.classList.toggle('wall'))
+    squares.push(square)
+    grid.append(square)
+  }
+}
 
 function paintDecoration(){
   walls.forEach(wall => squares[wall].classList.add('wall'))
@@ -29,34 +52,6 @@ function createWallArray(){
   return wallSquares.toString().replace(/,/g,', ')
 }
 
-function init() {
-  //grab the parent div for the Grid
-  const grid = document.querySelector('.grid')
-
-  //create the grid with width*width number of squares
-  for (let i = 0; i < width * width; i++) {
-    const square = document.createElement('div')
-    square.classList.add('grid-item')
-    //square.innerText = i
-    square.addEventListener('click', e => e.target.classList.toggle('wall'))
-    squares.push(square)
-    grid.append(square)
-  }
-
-
-  pacman = new Player('pacman',135)
-  ghosts.push(new Ghost('binky',189))
-  ghosts.push(new Ghost('pinky',188))
-
-  for(var i = 0; i < ghosts.length; i++){
-    const currentGhost = ghosts[i]
-    setTimeout( ()=> currentGhost.startMoving(), (i+1)*1000)
-  }
-
-  paintDecoration()
-  window.addEventListener('keydown',handleKeyDown)
-}
-
 function handleKeyDown(e){
   //dont do anything if the game is already lost
   if(gameLost) return
@@ -64,15 +59,19 @@ function handleKeyDown(e){
   switch (e.key) {
     case 'ArrowRight':
       pacman.direction = rightMove(pacman.location) ? 'right' : pacman.direction
+      e.preventDefault()
       break
     case 'ArrowLeft':
       pacman.direction = leftMove(pacman.location) ? 'left' : pacman.direction
+      e.preventDefault()
       break
     case 'ArrowUp':
       pacman.direction = upMove(pacman.location) ? 'up' : pacman.direction
+      e.preventDefault()
       break
     case 'ArrowDown':
       pacman.direction = downMove(pacman.location) ? 'down' : pacman.direction
+      e.preventDefault()
       break
   }
   if(!pacman.intId && pacman.direction) pacman.startMoving()
@@ -181,6 +180,7 @@ class Player {
     const pill = squares[this.location].classList.contains('pill') && !squares[this.location].classList.contains('eaten')
     if(pill){
       squares[this.location].classList.add('eaten')
+      scoreboard.up()
     }
   }
   checkDead(){
@@ -200,7 +200,7 @@ class Player {
 
 
 class Ghost{
-  constructor(name,square){
+  constructor(name, square, startDelay){
     this.name = name
     this.square = square
     this.bias = []
@@ -217,6 +217,8 @@ class Ghost{
     addSprite(this.name, this.square)
     //start the ghost in obstacle mode to navigate out of the prison
     this.modeSwitch('obstacle')
+    //start the ghost moving after the given delay
+    setTimeout( ()=> this.startMoving(), startDelay)
   }
   startMoving(){
     if(!this.intId){
@@ -399,7 +401,38 @@ class Ghost{
     //TODO: future modes
     //case 'poison': this.mode = 'poison'
   }
-  moveGhostSprite(){
+}
 
+class ScoreboardDefinition{
+  constructor(scoreboardClass){
+    this.score = 0
+    this.highScore = 0
+    this.lives = 3
+    this.boardElement = document.querySelector(scoreboardClass)
+    this.scoreElement = this.boardElement.querySelector('.score')
+    this.livesElement = this.boardElement.querySelector('.lives')
+    this.collectedElement = this.boardElement.querySelector('.collected')
+    this.scoreElement.innerText = `Score ${this.score}`
+    this.updateLives()
+    this.collectedElement.innerText = 'Collected = 0'
+  }
+  up(){
+    this.score++
+    this.scoreElement.innerText = `Score ${this.score}`
+    //added in some high score functionality
+    if (this.score > this.highScore) this.highScore = this.score
+  }
+  reset(){
+    this.score = 0
+    this.element.innerText = this.score
+  }
+  updateLives(change){
+    if(change) this.lives += parseInt(change)
+    console.log(this.lives)
+    for (let i = 0; i < this.lives; i++) {
+      const life = document.createElement('div')
+      life.classList.add('pacman', 'grid-item')
+      this.livesElement.append(life)
+    }
   }
 }

@@ -21,10 +21,9 @@ body {
   margin: 0 auto;
 }
 header{
-
   width:540px;
-  height: 155px;
-  padding-bottom: 10px;
+  height: 165px;
+  overflow: hidden;
 }
 header p{
   position: relative;
@@ -63,14 +62,44 @@ header h2{
 }
 
 main{
-  background-color: rgba(0,0,0,0.3);
-  box-shadow:  -5px  -5px  100px white, 5px  5px  100px white ;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-div.grid {
+article.grid {
+  background-color: rgba(0,0,0,0.3);
+  box-shadow:  -5px  -5px  100px white, 5px  5px  100px white ;
   width: 540px;
   display: flex;
   flex-wrap: wrap;
+}
+article.scoreboard {
+  background-color: rgba(0,0,0,0.8);
+  box-shadow:  -5px  -5px  100px white, 5px  5px  100px white ;
+  margin-top: 30px;
+  height: 70px;
+  width: 450px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+article.scoreboard .score{
+  background: linear-gradient(to bottom, #0075d6 20%, #85b3bf 48%, #3d2c09 53%, #914f25 60%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: 'Kanit', sans-serif;
+  font-size: 2em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+article.scoreboard .lives{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 div.grid-item {
@@ -142,9 +171,7 @@ div.grid-item.binky:before {
   animation: 0.7s linear ghostSlideRight;
 }
 
-
-div.grid-item.pacman:after {
-  display: block;
+.pacman:after {
   content: '';
   position: relative;
   width: 25px;

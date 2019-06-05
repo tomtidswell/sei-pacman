@@ -9,7 +9,6 @@ html, body {
 }
 
 body {
-  background-image: url('../assets/bg2.jpeg');
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;
@@ -19,7 +18,15 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  opacity: 0;
+  background-image: url('../assets/bg2reduced.jpeg');
 }
+
+body.ready{
+  opacity: 1;
+  transition: all 1s;
+}
+
 header{
   width:540px;
   height: 165px;
@@ -27,14 +34,14 @@ header{
 }
 header p{
   position: relative;
-  left:10px;
+  left:5px;
   top:10px;
   color: #fff;
   font-size: 1.5em;
   margin: 0;
   font-style: italic;
   font-family: 'Kanit', sans-serif;
-  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px blue, 0 0 30px purple, 0 0 40px red, 0 0 55px #49FF18, 0 0 75px #49ff18;
+  text-shadow: 0 0 5px #ddd, 0 0 10px #ddd, 0 0 20px blue, 0 0 30px purple, 0 0 40px red, 0 0 55px #49FF18, 0 0 75px #49ff18;
 }
 header h1{
   font-family: 'Kanit', sans-serif;
@@ -67,16 +74,39 @@ main{
   align-items: center;
 }
 
+article.grid .message-overlay{
+  position: absolute;
+  font-size: 10em;
+  line-height: 0.8;
+  letter-spacing: -3px;
+  text-align: center;
+  font-family: 'Kanit', sans-serif;
+  text-transform: uppercase;
+  color: white;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px blue, 0 0 30px purple;
+}
+article.grid .message-overlay .message{
+  position: relative;
+  z-index: 3;
+  animation: 1s linear messageZoom;
+}
+
 article.grid {
+  position: relative;
   background-color: rgba(0,0,0,0.3);
-  box-shadow:  -5px  -5px  100px white, 5px  5px  100px white ;
-  width: 540px;
+  box-shadow: -5px -5px 100px white, 5px 5px 100px white ;
+  width: 510px;
   display: flex;
   flex-wrap: wrap;
 }
 article.scoreboard {
   background-color: rgba(0,0,0,0.8);
-  box-shadow:  -5px  -5px  100px white, 5px  5px  100px white ;
+  box-shadow: -5px -5px 100px white, 5px 5px 100px white ;
   margin-top: 30px;
   height: 70px;
   width: 450px;
@@ -142,7 +172,7 @@ div.grid-item.prison:before {
   box-shadow: none;
 }
 
-div.grid-item.binky:before, div.grid-item.pinky:before {
+div.grid-item.binky:before, div.grid-item.pinky:before, div.grid-item.stinky:before, div.grid-item.clyde:before {
   background-repeat: no-repeat;
   background-size: contain;
   display: block;
@@ -158,16 +188,22 @@ div.grid-item.pinky:before {
 div.grid-item.binky:before {
   background-image: url('../assets/blinky.gif');
 }
-.binky-up:before, .pinky-up:before {
+div.grid-item.stinky:before {
+  background-image: url('../assets/inky.gif');
+}
+div.grid-item.clyde:before {
+  background-image: url('../assets/clyde.gif');
+}
+.binky-up:before, .pinky-up:before, .stinky-up:before, .clyde-up:before {
   animation: 0.7s linear ghostSlideUp;
 }
-.binky-down:before, .pinky-down:before {
+.binky-down:before, .pinky-down:before, .stinky-down:before, .clyde-down:before {
   animation: 0.7s linear ghostSlideDown;
 }
-.binky-left:before, .pinky-left:before {
+.binky-left:before, .pinky-left:before, .stinky-left:before, .clyde-left:before {
   animation: 0.7s linear ghostSlideLeft;
 }
-.binky-right:before, .pinky-right:before {
+.binky-right:before, .pinky-right:before, .stinky-right:before, .clyde-right:before {
   animation: 0.7s linear ghostSlideRight;
 }
 
@@ -203,7 +239,10 @@ div.grid-item.pacman.dead:after {
   transition: background-color 1s step-end;
 }
 
-
+@keyframes messageZoom {
+  0% {  transform: scale(0.01) rotate(0deg);}
+  100%{ transform: scale(1) rotate(0deg);}
+}
 @keyframes slideRight {
   0% {  transform: translateX(-34px) rotate(0deg);
         clip-path: polygon(100% 33%, 50% 50%, 100% 66%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}

@@ -1,60 +1,40 @@
-const width = 18
-const squares = []
 const ghosts = []
 let pacman = null
-let gameLost = false
 let scoreboard = null
+let messages = null
+let game = null
 
-const walls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 35, 38, 39, 41, 42, 43, 46, 47, 48, 50, 51, 54, 57, 59, 61, 64, 66, 68, 71, 72, 73, 74, 75, 79, 82, 86, 87, 88, 89, 90, 95, 102, 107, 108, 110, 111, 113, 114, 116, 117, 119, 120, 122, 123, 125, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 168, 169, 170, 171, 172, 173, 180, 182, 183, 184, 186, 187, 188, 189, 190, 191, 193, 194, 195, 197, 198, 204, 205, 208, 209, 215, 216, 218, 219, 220, 229, 230, 231, 233, 234, 242, 243, 251, 252, 254, 255, 256, 258, 259, 260, 261, 262, 263, 265, 266, 267, 269, 270, 273, 278, 279, 284, 287, 288, 294, 299, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323]
+const walls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 36, 37, 39, 40, 41, 43, 44, 45, 47, 48, 51, 54, 56, 58, 60, 62, 64, 67, 68, 69, 70, 71, 75, 77, 81, 82, 83, 84, 85, 90, 96, 101, 102, 104, 105, 107, 108, 110, 112, 113, 115, 116, 118, 136, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 151, 152, 159, 163, 170, 172, 173, 174, 176, 180, 182, 183, 184, 186, 187, 193, 194, 196, 197, 203, 204, 206, 207, 208, 216, 217, 218, 220, 221, 224, 229, 234, 237, 238, 239, 241, 242, 244, 245, 246, 247, 248, 250, 251, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
 
-const prison = [169, 170, 171, 172, 187, 188, 189, 190]
+const prison = [160, 161, 162, 177, 178, 179]
+
+document.fonts.ready.then(()=>{
+  //fade in the screen once the fonts have loaded
+  document.querySelector('body').classList.add('ready')
+})
 
 function init() {
-  paintGrid('.grid')
-  pacman = new Player('pacman',135)
-  ghosts.push(new Ghost('binky',189,1000))
-  ghosts.push(new Ghost('pinky',188,3000))
+  game = new LevelBuilder('.grid', 17, walls, prison)
+  pacman = new Player('pacman',127)
+  ghosts.push(new Ghost('binky',178,1000))
+  ghosts.push(new Ghost('pinky',178,3000))
+  ghosts.push(new Ghost('stinky',178,4500))
+  ghosts.push(new Ghost('clyde',178,6000))
   scoreboard = new ScoreboardDefinition('.scoreboard')
-  paintDecoration()
+  messages = new MessageBar('.message-overlay')
   window.addEventListener('keydown',handleKeyDown)
-}
-
-function paintGrid(gridClass){
-  //grab the parent div for the Grid
-  const grid = document.querySelector(gridClass)
-  //create the grid with width*width number of squares
-  for (let i = 0; i < width * width; i++) {
-    const square = document.createElement('div')
-    square.classList.add('grid-item')
-    //square.innerText = i
-    square.addEventListener('click', e => e.target.classList.toggle('wall'))
-    squares.push(square)
-    grid.append(square)
-  }
-}
-
-function paintDecoration(){
-  walls.forEach(wall => squares[wall].classList.add('wall'))
-  prison.forEach(cell => squares[cell].classList.add('prison'))
-  squares.forEach( (cell, index) => {
-    //if there is only 1 class defined, we know its grid-item, therefore it is an empty cell
-    if(squares[index].classList.length === 1) {
-      squares[index].classList.add('pill')
-      squares[index].innerHTML = '<i class="fas fa-dot-circle"></i>'
-    }
-  })
-}
-
-function createWallArray(){
-  const wallSquares = squares.reduce( (total,square,index) => {
-    return square.classList.contains('wall') ? total.concat(index) : total //include it if there is a wall class
-  },[])
-  return wallSquares.toString().replace(/,/g,', ')
 }
 
 function handleKeyDown(e){
   //dont do anything if the game is already lost
-  if(gameLost) return
+  if(game.lost) return
+  //if pacman isnt movable, and the spacebar is pressed, start the game
+  if(e.keyCode === 32 && !pacman.movable){
+    game.startRound()
+    e.preventDefault()
+  }
+  //if pacman isnt movable, return
+  if(!pacman.movable) return
   //apply the new direction into pacmans direction parameter so it can be picked up next interval
   switch (e.key) {
     case 'ArrowRight':
@@ -78,43 +58,28 @@ function handleKeyDown(e){
 }
 
 function rightMove(currentSquare){
-  if(currentSquare % width === width - 1) return currentSquare - width + 1 //returns the square at the start of the row
-  if(squares[currentSquare + 1].classList.contains('wall')) return null //no move if the square is a wall
+  if(currentSquare % game.gridWidth === game.gridWidth - 1) return currentSquare - game.gridWidth + 1 //returns the square at the start of the row
+  if(game.squares[currentSquare + 1].classList.contains('wall')) return null //no move if the square is a wall
+  if(game.squares[currentSquare + 1].classList.contains('prison')) return null //no move if the square is a prison
   return currentSquare + 1
 }
 function leftMove(currentSquare){
-  if(currentSquare % width === 0) return currentSquare + width - 1
-  if(squares[currentSquare - 1].classList.contains('wall')) return null //no move if the square is a wall
+  if(currentSquare % game.gridWidth === 0) return currentSquare + game.gridWidth - 1
+  if(game.squares[currentSquare - 1].classList.contains('wall')) return null //no move if the square is a wall
+  if(game.squares[currentSquare - 1].classList.contains('prison')) return null //no move if the square is a prison
   return currentSquare - 1
 }
 function upMove(currentSquare){
-  if(currentSquare - width < 0) return currentSquare -= width
-  if(squares[currentSquare - width].classList.contains('wall')) return null //no move if the square is a wall
-  return currentSquare - width
+  if(currentSquare - game.gridWidth < 0) return currentSquare -= game.gridWidth
+  if(game.squares[currentSquare - game.gridWidth].classList.contains('wall')) return null //no move if the square is a wall
+  if(game.squares[currentSquare - game.gridWidth].classList.contains('prison')) return null //no move if the square is a prison
+  return currentSquare - game.gridWidth
 }
 function downMove(currentSquare){
-  if(currentSquare + width > width * width) return currentSquare += width
-  if(squares[currentSquare + width].classList.contains('wall')) return null //no move if the square is a wall
-  return currentSquare + width
-}
-
-function initiateLoss(){
-  ghosts.forEach(ghost => ghost.stopMoving())
-  pacman.death()
-  gameLost = true
-  //TODO further loss functionality, scoreboard, message etc
-}
-
-function removeSprite(spriteClass, spriteIndex){
-  //for the first step, there will not be an old sprite to remove
-  if(!spriteIndex) return
-  squares[spriteIndex].classList.remove(spriteClass, `${spriteClass}-left`, `${spriteClass}-right`, `${spriteClass}-up`, `${spriteClass}-down`)
-}
-
-function addSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
-  //console.log(spriteClass, spriteVariant, spriteVariant2)
-  squares[spriteIndex].classList.add(spriteClass, spriteVariant)
-  if(spriteVariant2) squares[spriteIndex].classList.add(spriteVariant2)
+  if(currentSquare + game.gridWidth > game.gridWidth * game.gridWidth) return currentSquare += game.gridWidth
+  if(game.squares[currentSquare + game.gridWidth].classList.contains('wall')) return null //no move if the square is a wall
+  if(game.squares[currentSquare + game.gridWidth].classList.contains('prison')) return null //no move if the square is a prison
+  return currentSquare + game.gridWidth
 }
 
 window.addEventListener('DOMContentLoaded', init)
@@ -122,32 +87,41 @@ window.addEventListener('DOMContentLoaded', init)
 class Player {
   constructor(name,index){
     this.location = index
+    this.movable = false
+    this.startSquare = index
     this.previousLocation = null
     this.name = name
     this.intId = null
     this.direction = null
     this.availableMoves = {}
     this.dead = false
-    addSprite(this.name, this.location, 'start')
+    game.addSprite(this.name, this.location, 'start')
   }
   startMoving(){
     //dont allow pacman to move if he is dead
     if(this.dead) return
+    //make sure he is movable
+    this.movable = true
     //dont allow to start moving if there is already a timer running
     if(!this.intId){
       this.intId = setInterval( ()=>{
         this.move()
-        this.eat()
       }, 300)
       this.move()
-      this.eat()
     }
   }
   stopMoving(){
     clearInterval(this.intId)
     this.intId = null
+    //make sure he is movable
+    this.movable = false
+    //reset the movement direction so it doesnt start moving when resumed for the next round
+    this.direction = null
   }
   move(){
+    //dont allow pacman to move if he is dead
+    if(this.dead) return
+
     //set the location history
     this.previousLocation = this.location
 
@@ -171,37 +145,52 @@ class Player {
     //check if pacman should die in the new location, if so, dont move there
     this.checkDead()
     if(!this.dead && this.location !== this.previousLocation){
-      addSprite(this.name, this.location, `${this.name}-${this.direction}`)
-      removeSprite(this.name, this.previousLocation)
+      game.addSprite(this.name, this.location, `${this.name}-${this.direction}`)
+      game.removeSprite(this.name, this.previousLocation)
+      this.eat()
     }
   }
   eat(){
+    //dont eat if we're standing still
     if(this.location === this.previousLocation) return
-    const pill = squares[this.location].classList.contains('pill') && !squares[this.location].classList.contains('eaten')
-    if(pill){
-      squares[this.location].classList.add('eaten')
-      scoreboard.up()
-    }
+    //if the square contains a pill and its not already been eaten
+    if(game.squares[this.location].classList.contains('pill') && !game.squares[this.location].classList.contains('eaten')) game.pillEaten(this.location)
   }
   checkDead(){
+    //if pacman is already dead, we dont need to check it again
+    if(this.dead) return
+    //check if pacman is on the same square as a ghost
     ghosts.forEach(ghost => {
-      if(ghost.square === this.location){
-        initiateLoss()
-      }
+      if(ghost.square === this.location) game.initiateLoss()
     })
+  }
+  restart(){
+    this.stopMoving()
+    if(game.lost) return
+    this.dead = false
+    this.location = this.startSquare
+    game.addSprite(this.name, this.location, 'start')
+    //as long as the timer isnt already going, start pacman moving after the given delay
+    if(!this.intId) setTimeout( ()=> this.startMoving(), this.startDelay)
   }
   death(){
     this.stopMoving()
     this.dead = true
-    //the location has now changed due to the move logic, when compared to the DOM, so we cant use moveSprite to add the death class to pacman. Instead we can loop through the squares and apply the class
-    squares.forEach(square => square.classList.contains('pacman') ? square.classList.add('dead') : false)
+    //apply the class, and then remove pacman after a timeout, to allow the animation to run
+    //pacman can die either at this.location or at this.previousLocation
+    game.squares[this.location].classList.add('dead')
+    if(this.previousLocation) game.squares[this.previousLocation].classList.add('dead')
+    setTimeout( ()=> {
+      game.squares[this.location].classList.remove('pacman', 'pacman-up', 'pacman-down', 'pacman-left', 'pacman-right', 'dead')
+      if(this.previousLocation) game.squares[this.previousLocation].classList.remove('pacman', 'pacman-up', 'pacman-down', 'pacman-left', 'pacman-right', 'dead')
+    }, 2000)
   }
 }
-
 
 class Ghost{
   constructor(name, square, startDelay){
     this.name = name
+    this.startSquare = square
     this.square = square
     this.bias = []
     this.allDirections = ['up','right','down','left']
@@ -211,18 +200,30 @@ class Ghost{
     this.stepHistory = []
     this.availableMoves = {}
     this.mode = {}
-    this.killer = false
-    this.stepHistory.push(square)
-    //draw the ghost
-    addSprite(this.name, this.square)
-    //start the ghost in obstacle mode to navigate out of the prison
-    this.modeSwitch('obstacle')
-    //start the ghost moving after the given delay
-    setTimeout( ()=> this.startMoving(), startDelay)
+    this.killedPacman = false
+    this.startDelay = startDelay
+  }
+  clearSprite(location){
+    //console.log('clearing:',this.name, location)
+    game.removeSprite(this.name, location)
   }
   startMoving(){
-    if(!this.intId){
-      this.intId = setInterval( ()=>this.move(), 700)
+    setTimeout(()=>{
+      if(!this.intId) this.intId = setInterval( ()=>this.move(), 700)
+    }, this.startDelay)
+  }
+  resetPosition(){
+    //reset the position of the ghost, set a default direction and add the start square to the history
+    this.square = this.startSquare
+    this.direction = 'down'
+    this.addStep(this.square)
+    //draw the ghost
+    game.addSprite(this.name, this.square, `${this.name}-${this.direction}`)
+    //start the ghost in obstacle mode to navigate out of the prison
+    this.modeSwitch('obstacle')
+    //remove the most recent step - where the ghost is currently located
+    if(this.stepHistory[1]){
+      this.clearSprite(this.stepHistory[1])
     }
   }
   stopMoving(){
@@ -237,10 +238,10 @@ class Ghost{
   }
   calcDirectionBias(){
     //work out how far away the ghost is from pacman
-    const pacmanColumn = pacman.location%width
-    const pacmanRow = Math.floor(pacman.location/width)
-    const ghostColumn = this.square%width
-    const ghostRow = Math.floor(this.square/width)
+    const pacmanColumn = pacman.location % game.gridWidth
+    const pacmanRow = Math.floor(pacman.location / game.gridWidth)
+    const ghostColumn = this.square % game.gridWidth
+    const ghostRow = Math.floor(this.square / game.gridWidth)
     const horizontalDifference = ghostColumn-pacmanColumn
     const rowDifferential = ghostRow-pacmanRow
     //wipe the bias to recalculate it, and only add the direction to the bias if it is not zero. Add either left/right because the column (horizontal) difference is greater. Add either up/down because the row (vertical) difference is greater
@@ -250,7 +251,10 @@ class Ghost{
     if (rowDifferential > 0) this.bias.push('up')
     if (rowDifferential < 0) this.bias.push('down')
   }
-  move(){
+  move(forcedLocation){
+    //set the newSquare to be the forced location only if one is passed in otherwise initialise it
+    let newSquare = forcedLocation ? forcedLocation : null
+
     //increase the move stepCounter
     this.stepCounter++
 
@@ -259,17 +263,21 @@ class Ghost{
     this.calcAvailableMoves()
 
     //understand if we are in a special mode of operation, run the appropriate method
-    let newSquare = null
-    switch(this.calcMode()) {
-      case 'obstacle':
-        newSquare = this.obstacleModeMove()
-        break
-      default:
-        newSquare = this.noModeMove()
+    if(!newSquare){
+      switch(this.calcMode()) {
+        case 'obstacle':
+          newSquare = this.obstacleModeMove()
+          break
+        default:
+          newSquare = this.noModeMove()
+      }
     }
 
-    //check we made a choice, then make the move and apply to the object parameters
-    if(newSquare){
+    //check to see if this newSquare will kill pacman - if it will, stop play
+    if(this.willKillPacman(newSquare)) game.initiateLoss()
+
+    //if we didnt kill pacman, check we made a choice, then make the move and apply to the object parameters, but only if pacman is alive. If he's dead, dont move there because it will ruin the death animation
+    if(newSquare && !this.killedPacman){
       //identify the new direction based on the newSquare variable
       this.direction = Object.keys(this.availableMoves).filter(direction => this.availableMoves[direction] === newSquare )[0]
       //apply the new square
@@ -277,15 +285,11 @@ class Ghost{
       //console.log('Chose:', this.direction, this.square)
       //add the square to the loaction history
       this.addStep(this.square)
-      // check to see if that move killed pacman
-      if(this.killedPacman()){
-        initiateLoss()
-      } else {
-        //move to the square, by moving the sprite
-        addSprite(this.name, this.square, `${this.name}-${this.direction}`)
-        //we just added the new location to the history, remove the old sprite from history position #1
-        removeSprite(this.name, this.stepHistory[1])
-      }
+
+      //move to the square, by moving the sprite
+      game.addSprite(this.name, this.square, `${this.name}-${this.direction}`)
+      //we just added the new location to the history, remove the old sprite from history position #1
+      this.clearSprite(this.stepHistory[1])
     }
   }
   noModeMove(){
@@ -364,9 +368,9 @@ class Ghost{
       this.stepHistory.pop()
     }
   }
-  killedPacman(){
-    this.killer = this.square === pacman.location
-    return this.killer
+  willKillPacman(index){
+    this.killedPacman = game.squares[index].classList.contains('pacman')
+    return this.killedPacman
   }
   oppositeDirection(direction){
     switch(direction){
@@ -396,10 +400,98 @@ class Ghost{
     if(!this.mode.name){
       this.mode.name = mode
       this.mode.started = this.stepCounter
-      this.mode.ends = this.stepCounter + 5
+      this.mode.ends = this.stepCounter + 3
     }
     //TODO: future modes
     //case 'poison': this.mode = 'poison'
+  }
+}
+
+class LevelBuilder{
+  constructor(gridClass, gridWidth, walls, prison){
+    this.gridClass = gridClass
+    this.grid = document.querySelector(this.gridClass)
+    this.gridWidth = gridWidth
+    this.walls = walls
+    this.prison = prison
+    this.squares = []
+    this.lost = false
+    this.totalPills = 0
+    this.pillsRemaining = null
+    this.paintGrid()
+    this.paintDecoration()
+  }
+  startRound(){
+    ghosts.forEach(ghost => ghost.resetPosition())
+    messages.newSequence(['3','2','1','GO!',''],1000)
+    setTimeout( ()=> ghosts.forEach(ghost => ghost.startMoving()), 3000)
+    setTimeout( ()=> pacman.restart(), 3000)
+  }
+  initiateWin(){
+    //check that we havent already lost the game
+    if(game.lost) return
+    //freeze the ghosts in place
+    ghosts.forEach(ghost => ghost.stopMoving())
+    messages.newSingle('Level Complete')
+  }
+  initiateLoss(){
+    //check that we havent already lost the game
+    if(game.lost) return
+    //ensure pacman is dead
+    pacman.death()
+    scoreboard.updateLives(-1)
+    //if there are more lives to lose, freeze the ghosts in place, otherwise they should endlessly move
+    if(scoreboard.lives > 0){
+      ghosts.forEach(ghost => ghost.stopMoving())
+    } else {
+      messages.newSingle('Game over')
+      game.lost = true
+    }
+  }
+  pillEaten(index){
+    this.squares[index].classList.add('eaten')
+    scoreboard.up()
+    this.pillsRemaining--
+    if (this.pillsRemaining === 0) this.initiateWin()
+  }
+  removeSprite(spriteClass, spriteIndex){
+    //for the first step, there will not be an old sprite to remove
+    if(!spriteIndex) return
+    this.squares[spriteIndex].classList.remove(spriteClass, `${spriteClass}-left`, `${spriteClass}-right`, `${spriteClass}-up`, `${spriteClass}-down`)
+  }
+  addSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
+    this.squares[spriteIndex].classList.add(spriteClass, spriteVariant)
+    if(spriteVariant2) this.squares[spriteIndex].classList.add(spriteVariant2)
+  }
+  paintGrid(){
+    //create the grid with width*width number of squares
+    for (let i = 0; i < this.gridWidth * this.gridWidth; i++) {
+      const square = document.createElement('div')
+      square.classList.add('grid-item')
+      //square.classList.add(`index${i}`)
+      square.addEventListener('click', e => e.target.classList.toggle('wall'))
+      this.squares.push(square)
+      this.grid.append(square)
+    }
+  }
+  paintDecoration(){
+    this.walls.forEach(wall => this.squares[wall].classList.add('wall'))
+    this.prison.forEach(cell => this.squares[cell].classList.add('prison'))
+    this.squares.forEach( (cell, index) => {
+      //if there is only 1 class defined, we know its grid-item, therefore it is an empty cell
+      if(this.squares[index].classList.length === 1) {
+        this.squares[index].classList.add('pill')
+        this.squares[index].innerHTML = '<i class="fas fa-dot-circle"></i>'
+        this.totalPills++
+      }
+    })
+    this.pillsRemaining = this.totalPills
+  }
+  createWallArray(){
+    const wallSquares = this.squares.reduce( (total,square,index) => {
+      return square.classList.contains('wall') ? total.concat(index) : total //include it if there is a wall class
+    },[])
+    return wallSquares.toString().replace(/,/g,', ')
   }
 }
 
@@ -408,13 +500,14 @@ class ScoreboardDefinition{
     this.score = 0
     this.highScore = 0
     this.lives = 3
+    this.gameLost = false
     this.boardElement = document.querySelector(scoreboardClass)
     this.scoreElement = this.boardElement.querySelector('.score')
     this.livesElement = this.boardElement.querySelector('.lives')
     this.collectedElement = this.boardElement.querySelector('.collected')
     this.scoreElement.innerText = `Score ${this.score}`
     this.updateLives()
-    this.collectedElement.innerText = 'Collected = 0'
+    this.collectedElement.innerText = 'Collected'
   }
   up(){
     this.score++
@@ -428,11 +521,29 @@ class ScoreboardDefinition{
   }
   updateLives(change){
     if(change) this.lives += parseInt(change)
-    console.log(this.lives)
+    this.livesElement.innerHTML = ''
     for (let i = 0; i < this.lives; i++) {
       const life = document.createElement('div')
       life.classList.add('pacman', 'grid-item')
       this.livesElement.append(life)
     }
+  }
+}
+
+class MessageBar{
+  constructor(messageBarClass){
+    this.element = document.querySelector(messageBarClass)
+  }
+  newSequence(messages,timeBetween){
+    messages.forEach( (message, index) => {
+      setTimeout( () => this.newSingle(message), timeBetween * (index+1))
+    })
+  }
+  newSingle(message){
+    this.element.innerHTML = ''
+    const childDiv = document.createElement('div')
+    childDiv.innerText = message
+    childDiv.classList.add('message')
+    this.element.append(childDiv)
   }
 }

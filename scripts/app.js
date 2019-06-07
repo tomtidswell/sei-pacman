@@ -1,12 +1,33 @@
+// TODO
+// Add fruit/sweeties which can be collected
+// Add clockwise logic for ghosts
+// Allow level progression
+
 const ghosts = []
 let pacman = null
 let scoreboard = null
 let messages = null
 let game = null
 
-const walls = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 36, 37, 39, 40, 41, 43, 44, 45, 47, 48, 51, 54, 56, 58, 60, 62, 64, 67, 68, 69, 70, 71, 75, 77, 81, 82, 83, 84, 85, 90, 96, 101, 102, 104, 105, 107, 108, 110, 112, 113, 115, 116, 118, 136, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 151, 152, 159, 163, 170, 172, 173, 174, 176, 180, 182, 183, 184, 186, 187, 193, 194, 196, 197, 203, 204, 206, 207, 208, 216, 217, 218, 220, 221, 224, 229, 234, 237, 238, 239, 241, 242, 244, 245, 246, 247, 248, 250, 251, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
+//TODO - auto level progression
+const levelData = [
+  //Level 0 - This is a medium difficulty level
+  {
+    name: 'level0',
+    prison: [160, 161, 162, 177, 178, 179],
+    bigPills: [53, 65, 225, 233],
+    walls: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 36, 37, 39, 40, 41, 43, 44, 45, 47, 48, 51, 54, 56, 58, 60, 62, 64, 67, 68, 69, 70, 71, 75, 77, 81, 82, 83, 84, 85, 90, 96, 101, 102, 104, 105, 107, 108, 110, 112, 113, 115, 116, 118, 136, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 151, 152, 159, 163, 170, 172, 173, 174, 176, 180, 182, 183, 184, 186, 187, 193, 194, 196, 197, 203, 204, 206, 207, 208, 216, 217, 218, 220, 221, 224, 229, 234, 237, 238, 239, 241, 242, 244, 245, 246, 247, 248, 250, 251, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
+  },
+  //Level 1 - this is a pretty hard level!!!!
+  {
+    name: 'level1',
+    prison: [160, 161, 162, 177, 178, 179],
+    bigPills: [53, 65, 225, 233],
+    walls: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 34, 36, 37, 38, 40, 41, 43, 44, 46, 47, 48, 50, 51, 55, 58, 60, 63, 67, 68, 70, 72, 75, 77, 80, 82, 84, 85, 86, 87, 99, 100, 101, 102, 103, 104, 106, 107, 108, 109, 110, 111, 112, 113, 114, 116, 117, 118, 119, 120, 121, 133, 134, 135, 140, 141, 142, 143, 144, 145, 146, 147, 148, 153, 154, 155, 159, 163, 167, 168, 169, 170, 171, 172, 174, 175, 176, 180, 181, 182, 184, 185, 186, 187, 188, 189, 193, 194, 196, 197, 201, 202, 203, 204, 205, 206, 207, 217, 218, 219, 220, 221, 227, 228, 229, 230, 231, 237, 238, 239, 240, 241, 243, 244, 248, 249, 251, 252, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
+  }
+]
 
-const prison = [160, 161, 162, 177, 178, 179]
+window.addEventListener('DOMContentLoaded', init)
 
 document.fonts.ready.then(()=>{
   //fade in the screen once the fonts have loaded
@@ -14,12 +35,13 @@ document.fonts.ready.then(()=>{
 })
 
 function init() {
-  game = new LevelBuilder('.grid', 17, walls, prison)
+  game = new GameDefinition('.grid', 17, levelData)
   pacman = new Player('pacman',127)
-  ghosts.push(new Ghost('binky',178,1000))
-  ghosts.push(new Ghost('pinky',178,3000))
-  ghosts.push(new Ghost('stinky',178,4500))
-  ghosts.push(new Ghost('clyde',178,6000))
+  ghosts.push(new Ghost('binky',160,53,2))
+  ghosts.push(new Ghost('pinky',162,65,6))
+  ghosts.push(new Ghost('stinky',177,240,10))
+  ghosts.push(new Ghost('clyde',179,252,14))
+  game.paintDecoration() //draw the decorations once we initialised the sprites
   scoreboard = new ScoreboardDefinition('.scoreboard')
   messages = new MessageBar('.message-overlay')
   window.addEventListener('keydown',handleKeyDown)
@@ -54,19 +76,20 @@ function handleKeyDown(e){
       e.preventDefault()
       break
   }
-  if(!pacman.intId && pacman.direction) pacman.startMoving()
 }
+
+// Move rules:
+// 1. Can not move into a wall tile
+// 2. Can not move up into a prison tile, but can move left/down/right into a prison tile
 
 function rightMove(currentSquare){
   if(currentSquare % game.gridWidth === game.gridWidth - 1) return currentSquare - game.gridWidth + 1 //returns the square at the start of the row
   if(game.squares[currentSquare + 1].classList.contains('wall')) return null //no move if the square is a wall
-  if(game.squares[currentSquare + 1].classList.contains('prison')) return null //no move if the square is a prison
   return currentSquare + 1
 }
 function leftMove(currentSquare){
   if(currentSquare % game.gridWidth === 0) return currentSquare + game.gridWidth - 1
   if(game.squares[currentSquare - 1].classList.contains('wall')) return null //no move if the square is a wall
-  if(game.squares[currentSquare - 1].classList.contains('prison')) return null //no move if the square is a prison
   return currentSquare - 1
 }
 function upMove(currentSquare){
@@ -78,11 +101,9 @@ function upMove(currentSquare){
 function downMove(currentSquare){
   if(currentSquare + game.gridWidth > game.gridWidth * game.gridWidth) return currentSquare += game.gridWidth
   if(game.squares[currentSquare + game.gridWidth].classList.contains('wall')) return null //no move if the square is a wall
-  if(game.squares[currentSquare + game.gridWidth].classList.contains('prison')) return null //no move if the square is a prison
   return currentSquare + game.gridWidth
 }
 
-window.addEventListener('DOMContentLoaded', init)
 
 class Player {
   constructor(name,index){
@@ -95,28 +116,7 @@ class Player {
     this.direction = null
     this.availableMoves = {}
     this.dead = false
-    game.addSprite(this.name, this.location, 'start')
-  }
-  startMoving(){
-    //dont allow pacman to move if he is dead
-    if(this.dead) return
-    //make sure he is movable
-    this.movable = true
-    //dont allow to start moving if there is already a timer running
-    if(!this.intId){
-      this.intId = setInterval( ()=>{
-        this.move()
-      }, 300)
-      this.move()
-    }
-  }
-  stopMoving(){
-    clearInterval(this.intId)
-    this.intId = null
-    //make sure he is movable
-    this.movable = false
-    //reset the movement direction so it doesnt start moving when resumed for the next round
-    this.direction = null
+    game.addSprite(this.name, this.location, `${this.name}-${this.direction}`)
   }
   move(){
     //dont allow pacman to move if he is dead
@@ -155,29 +155,38 @@ class Player {
     if(this.location === this.previousLocation) return
     //if the square contains a pill and its not already been eaten
     if(game.squares[this.location].classList.contains('pill') && !game.squares[this.location].classList.contains('eaten')) game.pillEaten(this.location)
+    //if the square contains a big pill and its not already been eaten
+    if(game.squares[this.location].classList.contains('big-pill') && !game.squares[this.location].classList.contains('eaten')) game.bigPillEaten(this.location)
   }
   checkDead(){
     //if pacman is already dead, we dont need to check it again
     if(this.dead) return
     //check if pacman is on the same square as a ghost
     ghosts.forEach(ghost => {
-      if(ghost.square === this.location) game.initiateLoss()
+      //if pacman is on the same square as a ghost, he should die
+      if(ghost.square.current === this.location && ghost.bias.inverted === 0) this.death()
+      //if pacman hasnt eaten a big pill and is on the same square, the ghost should die
+      if(ghost.square.current === this.location && ghost.bias.inverted > 0){
+        scoreboard.up(100)
+        ghost.resetPosition()
+      }
     })
   }
-  restart(){
-    this.stopMoving()
+  reset(){
     if(game.lost) return
     this.dead = false
+    pacman.movable = true
     this.location = this.startSquare
+    this.direction = null
     game.addSprite(this.name, this.location, 'start')
-    //as long as the timer isnt already going, start pacman moving after the given delay
-    if(!this.intId) setTimeout( ()=> this.startMoving(), this.startDelay)
   }
   death(){
-    this.stopMoving()
+    //if pacman is already dead, we dont need to run this routine again
+    if(this.dead) return
+    //stop movement if pacman has lives left
     this.dead = true
-    //apply the class, and then remove pacman after a timeout, to allow the animation to run
-    //pacman can die either at this.location or at this.previousLocation
+    game.initiateLoss('pacman')
+    //apply the class, and then remove pacman after a timeout, to allow the animation to run. Pacman can die either at this.location or at this.previousLocation
     game.squares[this.location].classList.add('dead')
     if(this.previousLocation) game.squares[this.previousLocation].classList.add('dead')
     setTimeout( ()=> {
@@ -188,81 +197,121 @@ class Player {
 }
 
 class Ghost{
-  constructor(name, square, startDelay){
+  constructor(name, square, homeSquare, startOnClock){
     this.name = name
-    this.startSquare = square
-    this.square = square
-    this.bias = []
+    this.square = { current: square, start: square, history: [], home: homeSquare }
+    this.bias = { directions: [], inverted: 0, targetName: '', targetLocation: '' }
     this.allDirections = ['up','right','down','left']
-    this.direction = 'down'
-    this.intId = null
+    this.startDirection = 'left'
+    this.direction = this.startDirection
     this.stepCounter = 0
-    this.stepHistory = []
     this.availableMoves = {}
     this.mode = {}
     this.killedPacman = false
-    this.startDelay = startDelay
+    this.startOnClock = startOnClock
   }
   clearSprite(location){
-    //console.log('clearing:',this.name, location)
     game.removeSprite(this.name, location)
-  }
-  startMoving(){
-    setTimeout(()=>{
-      if(!this.intId) this.intId = setInterval( ()=>this.move(), 700)
-    }, this.startDelay)
   }
   resetPosition(){
     //reset the position of the ghost, set a default direction and add the start square to the history
-    this.square = this.startSquare
-    this.direction = 'down'
-    this.addStep(this.square)
-    //draw the ghost
-    game.addSprite(this.name, this.square, `${this.name}-${this.direction}`)
-    //start the ghost in obstacle mode to navigate out of the prison
-    this.modeSwitch('obstacle')
+    this.bias.inverted = 0
+    this.killedPacman = false
+    this.square.current = this.square.start
+    this.direction = this.startDirection
+    this.addStep(this.square.current)
+    //start the ghost with a target to navigate out of the prison
+    this.bias.targetName = 'prison-exit'
+    this.bias.targetLocation = 212
     //remove the most recent step - where the ghost is currently located
-    if(this.stepHistory[1]){
-      this.clearSprite(this.stepHistory[1])
+    if(this.square.history[1]){
+      this.clearSprite(this.square.history[1])
     }
-  }
-  stopMoving(){
-    clearInterval(this.intId)
-    this.intId = null
+    //draw the ghost in its new position
+    game.addSprite(this.name, this.square.current, `${this.name}-${this.direction}`)
   }
   calcAvailableMoves(){
-    this.availableMoves.right = rightMove(this.square)
-    this.availableMoves.left = leftMove(this.square)
-    this.availableMoves.up = upMove(this.square)
-    this.availableMoves.down = downMove(this.square)
+    this.availableMoves.right = rightMove(this.square.current)
+    this.availableMoves.left = leftMove(this.square.current)
+    this.availableMoves.up = upMove(this.square.current)
+    this.availableMoves.down = downMove(this.square.current)
+  }
+  calcTarget(){
+    const theTarget = this.bias.targetName
+    switch (theTarget) {
+      case 'prison-exit':
+        //if we reached the target, reset it to pacman
+        if(this.square.current === this.bias.targetLocation){
+          this.bias.targetName = 'pacman'
+          this.bias.targetLocation = pacman.location
+        }
+        break
+      case 'home-area':
+        this.bias.targetLocation = this.square.home
+        //if we reached the target, reset it to pacman
+        if(this.square.current === this.bias.targetLocation){
+          this.bias.targetName = 'pacman'
+          this.bias.targetLocation = pacman.location
+        }
+        break
+      case 'pacman':
+        //update pacman's location
+        this.bias.targetLocation = pacman.location
+        break
+      default:
+        //as a safety, set pacman back to be the target
+        this.bias.targetName = 'pacman'
+        this.bias.targetLocation = pacman.location
+    }
+    if(theTarget !== this.bias.targetName) console.log(`${this.name} switched target from ${theTarget} to ${this.bias.targetName}`)
   }
   calcDirectionBias(){
-    //work out how far away the ghost is from pacman
-    const pacmanColumn = pacman.location % game.gridWidth
-    const pacmanRow = Math.floor(pacman.location / game.gridWidth)
-    const ghostColumn = this.square % game.gridWidth
-    const ghostRow = Math.floor(this.square / game.gridWidth)
-    const horizontalDifference = ghostColumn-pacmanColumn
-    const rowDifferential = ghostRow-pacmanRow
+    //work out how far away the ghost is from the target (pacman, home-area or prison-exit)
+    const targetColumn = this.bias.targetLocation % game.gridWidth
+    const targetRow = Math.floor(this.bias.targetLocation / game.gridWidth)
+    const ghostColumn = this.square.current % game.gridWidth
+    const ghostRow = Math.floor(this.square.current / game.gridWidth)
+    const horizontalDifference = ghostColumn - targetColumn
+    const rowDifferential = ghostRow - targetRow
     //wipe the bias to recalculate it, and only add the direction to the bias if it is not zero. Add either left/right because the column (horizontal) difference is greater. Add either up/down because the row (vertical) difference is greater
-    this.bias = []
-    if (horizontalDifference > 0) this.bias.push('left')
-    if (horizontalDifference < 0) this.bias.push('right')
-    if (rowDifferential > 0) this.bias.push('up')
-    if (rowDifferential < 0) this.bias.push('down')
+    this.bias.directions = []
+    if (horizontalDifference > 0) this.bias.directions.push('left')
+    if (horizontalDifference < 0) this.bias.directions.push('right')
+    if (rowDifferential > 0) this.bias.directions.push('up')
+    if (rowDifferential < 0) this.bias.directions.push('down')
+  }
+  checkBiasInversion(){
+    if(this.bias.inverted > 0){
+      const newDirections = []
+      this.bias.directions.forEach(direction => newDirections.push(this.oppositeDirection(direction)))
+      this.bias.directions = newDirections
+      if(this.bias.inverted === 1) console.log(`${this.name} is now switching back to attacking pacman (ending bias inversion)`)
+      this.bias.inverted--
+    }
+  }
+  specialSprite(){
+    //bias inversion lasts for 30 turns - when there are only 10 left, signal that it is ending by changing the sprite
+    if(this.bias.inverted > 10) return `${this.name}-pilled`
+    if(this.bias.inverted > 0) return `${this.name}-pilled-ending`
+    return null
   }
   move(forcedLocation){
+    //only move if the game clock is after the ghost's startOnClock
+    if(game.clock < this.startOnClock) return
+
     //set the newSquare to be the forced location only if one is passed in otherwise initialise it
     let newSquare = forcedLocation ? forcedLocation : null
-
     //increase the move stepCounter
     this.stepCounter++
 
     // generate the direction bias to influence the direction of travel, and work out what the available moves are
+    this.calcTarget()
     this.calcDirectionBias()
+    this.checkBiasInversion() //when a big pill has been eaten
     this.calcAvailableMoves()
 
-    //understand if we are in a special mode of operation, run the appropriate method
+
+    //understand if we are in a special mode of movement, run the appropriate method
     if(!newSquare){
       switch(this.calcMode()) {
         case 'obstacle':
@@ -273,23 +322,28 @@ class Ghost{
       }
     }
 
-    //check to see if this newSquare will kill pacman - if it will, stop play
-    if(this.willKillPacman(newSquare)) game.initiateLoss()
+    //check to see if this newSquare will kill pacman - if it will, stop play. It returns a revised newSquare value just in case pacman killed the ghost
+    newSquare = this.pacmanInteraction(newSquare)
+    if(this.killedPacman){
+      game.initiateLoss(this.name)
+    }
 
     //if we didnt kill pacman, check we made a choice, then make the move and apply to the object parameters, but only if pacman is alive. If he's dead, dont move there because it will ruin the death animation
     if(newSquare && !this.killedPacman){
       //identify the new direction based on the newSquare variable
       this.direction = Object.keys(this.availableMoves).filter(direction => this.availableMoves[direction] === newSquare )[0]
+      //as a backup, use the start direction in case the chosen move isnt available (warping back to the prison may cause this)
+      if(!this.direction) this.direction = this.startDirection
       //apply the new square
-      this.square = newSquare
+      this.square.current = newSquare
       //console.log('Chose:', this.direction, this.square)
       //add the square to the loaction history
-      this.addStep(this.square)
+      this.addStep(this.square.current)
 
       //move to the square, by moving the sprite
-      game.addSprite(this.name, this.square, `${this.name}-${this.direction}`)
+      game.addSprite(this.name, this.square.current, `${this.name}-${this.direction}`, this.specialSprite())
       //we just added the new location to the history, remove the old sprite from history position #1
-      this.clearSprite(this.stepHistory[1])
+      this.clearSprite(this.square.history[1])
     }
   }
   noModeMove(){
@@ -315,7 +369,7 @@ class Ghost{
 
     // I'm at a junction and there are more than one moves available that arent where I came from, choose a direction at the junction which takes me towards pacman
     if(crossroads.length > 1){
-      const biasJcnDirections = crossroads.filter(direction => this.bias.includes(direction))
+      const biasJcnDirections = crossroads.filter(direction => this.bias.directions.includes(direction))
       //console.log('Jcn based on bias', biasJcnDirections, biasJcnDirections.length)
       //decide if the junction options are in the bias or not
       if(biasJcnDirections.length > 0){
@@ -332,7 +386,7 @@ class Ghost{
     }
 
     // 3. If I havent decided yet and there is only 1 choice and it is away from pacman, go into obstacle mode
-    if(!newSquare && crossroads.length === 1 && this.bias.includes(this.oppositeDirection(crossroads[0]))){
+    if(!newSquare && crossroads.length === 1 && this.bias.directions.includes(this.oppositeDirection(crossroads[0]))){
       //console.log('theres no good junction choice, so lets go into obstacle mode')
       this.modeSwitch('obstacle')
       //instead of skipping the turn, immediately run the obstacle logic
@@ -354,23 +408,33 @@ class Ghost{
     //console.log('OPERATING IN OBSTACLE MODE')
 
     //to move in an anticlocwise direction, we need to identify the last direction of travel and choose the first available direction an index before our previous direction
-    const anticlockwiseDirections = this.anticlockwiseDirections(this.direction)
+    const directionPreferenceOrder = this.anticlockwiseDirections(this.direction)
 
     //the array items are listed in anticlockwise order, so find the first index that is allowed
-    const direction = anticlockwiseDirections.find(direction => this.availableMoves[direction])
+    const preferredDirection = directionPreferenceOrder.find(direction => this.availableMoves[direction])
     //console.log('Obstacle navigation chose:', direction)
-    return this.availableMoves[direction]
+    return this.availableMoves[preferredDirection]
   }
   addStep(step){
     //add the new step to the start of the history, and see if we have more than 4 steps recorded
-    this.stepHistory.unshift(step)
-    while(this.stepHistory.length > 4){
-      this.stepHistory.pop()
+    this.square.history.unshift(step)
+    while(this.square.history.length > 4){
+      this.square.history.pop()
     }
   }
-  willKillPacman(index){
-    this.killedPacman = game.squares[index].classList.contains('pacman')
-    return this.killedPacman
+  pacmanInteraction(index){
+    let revisedIndex = index
+    //will kill pacman if he is on the same square, and the bias is not inverted
+    if(game.squares[index].classList.contains('pacman') && this.bias.inverted === 0){
+      this.killedPacman = true
+    }
+    //if the bias is inverted and pacman is on this square, gain 100 points and fly back to the prison
+    if(this.bias.inverted > 0 && game.squares[index].classList.contains('pacman')){
+      this.resetPosition()
+      revisedIndex = this.square.current //reset position changed this.square.current to the start position
+      scoreboard.up(100)
+    }
+    return revisedIndex
   }
   oppositeDirection(direction){
     switch(direction){
@@ -389,7 +453,7 @@ class Ghost{
   calcMode(){
     //if there is a mode defined, and it should end this turn, end it
     if(this.mode.name && this.mode.ends === this.stepCounter){
-      console.log('ending mode')
+      console.log(`${this.name} is ending ${this.mode.name} mode`)
       this.mode = {}
     }
     //if there is a mode active, return the name of it
@@ -398,6 +462,7 @@ class Ghost{
   modeSwitch(mode){
     //if there isnt a mode in operation, set it to the new mode, and record the step number
     if(!this.mode.name){
+      console.log(`${this.name} is starting ${mode} mode`)
       this.mode.name = mode
       this.mode.started = this.stepCounter
       this.mode.ends = this.stepCounter + 3
@@ -407,64 +472,143 @@ class Ghost{
   }
 }
 
-class LevelBuilder{
-  constructor(gridClass, gridWidth, walls, prison){
+class GameDefinition{
+  constructor(gridClass, gridWidth, levelData){
     this.gridClass = gridClass
     this.grid = document.querySelector(this.gridClass)
     this.gridWidth = gridWidth
-    this.walls = walls
-    this.prison = prison
+    this.levelData = levelData
+    //this.levelId = level
+    //this.walls = walls
+    //this.prison = prison
+    //this.bigPills = bigPills
+    this.currentLevel = 0
     this.squares = []
     this.lost = false
+    this.roundLost = false
     this.totalPills = 0
     this.pillsRemaining = null
+    this.clock = 0
+    this.intId = null
+    this.turnInterval = 500
     this.paintGrid()
-    this.paintDecoration()
+    //this.paintDecoration()
+  }
+  startMovement(){
+    //each game turn runs the eachMove function
+    if(!this.intId) this.intId = setInterval( ()=> this.eachMove() , this.turnInterval)
+  }
+  stopMovement(){
+    clearInterval(this.intId)
+    this.intId = null
+    //make sure pacman isnt movable
+    pacman.movable = false
+    //reset the movement direction so it doesnt start moving when resumed for the next round
+    pacman.direction = null
+  }
+  eachMove(){
+    //this code is run for each game 'turn' - pacman and the ghosts are moved, the clock advanced, and a decision is made about what target mode the ghosts should operate in
+
+    //GAME
+    this.clock++
+    //console.log(this.clock)
+
+    //if pacman is dead but there are more lives remaining, skip the chance for the ghosts to move
+    if(pacman.dead && scoreboard.lives > 0) return
+
+    //PACMAN - pacman could die on his turn, and before the ghosts' turns so we need to check before they run
+    pacman.move()
+    if(pacman.dead){
+      this.initiateLoss('post-pacman move logic')
+    }
+
+    //if pacman is dead but there are more lives remaining, skip the chance for the ghosts to move
+    if(pacman.dead && scoreboard.lives > 0) return
+
+    //GHOSTS - the switch targets is a game wide setting that determines if the ghosts target pacman or their home area (each quarter of the grid homes one ghost)
+    this.switchGhostTargets()
+    ghosts.forEach(ghost => ghost.move())
+    if(pacman.dead){
+      this.initiateLoss('post ghost move logic')
+    }
+  }
+  switchGhostTargets(){
+    //this mechanism should make the ghosts switch to target the four corners instead of pacman, but this should only last for 20 turns
+    const shouldTargetHome = [40,80].includes(this.clock)
+    const shouldTargetPacman = [60,100].includes(this.clock) //resets the target to pacman
+    //if the current target is pacman, and we should be navigating home this turn, switch target
+    if(shouldTargetHome) {
+      console.log('All ghosts targetting home')
+      ghosts.filter(ghost => ghost.bias.targetName === 'pacman').forEach(ghost => ghost.bias.targetName = 'home-area')
+    }
+    if(shouldTargetPacman) {
+      console.log('All ghosts targetting pacman')
+      ghosts.filter(ghost => ghost.bias.targetName === 'home-area').forEach(ghost => ghost.bias.targetName = 'pacman')
+    }
   }
   startRound(){
+    //reset the round variables
+    this.clock = 0
+    this.roundLost = false
+    //reset the sprites
+    pacman.reset()
     ghosts.forEach(ghost => ghost.resetPosition())
     messages.newSequence(['3','2','1','GO!',''],1000)
-    setTimeout( ()=> ghosts.forEach(ghost => ghost.startMoving()), 3000)
-    setTimeout( ()=> pacman.restart(), 3000)
+    setTimeout( ()=> this.startMovement(), 3000)
   }
   initiateWin(){
-    //check that we havent already lost the game
-    if(game.lost) return
-    //freeze the ghosts in place
-    ghosts.forEach(ghost => ghost.stopMoving())
+    //check that we havent already lost the game, or the round
+    if(this.lost) return
+    if(this.roundLost) return
+    this.stopMovement()
     messages.newSingle('Level Complete')
   }
-  initiateLoss(){
-    //check that we havent already lost the game
-    if(game.lost) return
+  initiateLoss(lossTrigger){
+    //check that we havent already lost the game, or this round
+    if(this.lost) return
+    if(this.roundLost) return
+
+    //set that the round has been lost
+    this.roundLost = true
+
+    console.log('Loss trigger:',lossTrigger)
     //ensure pacman is dead
     pacman.death()
     scoreboard.updateLives(-1)
-    //if there are more lives to lose, freeze the ghosts in place, otherwise they should endlessly move
-    if(scoreboard.lives > 0){
-      ghosts.forEach(ghost => ghost.stopMoving())
-    } else {
+    //if there are no more lives to lose set the game to lost, and signal game over. If there are more lives to lose, stop the ghosts from moving
+    if(scoreboard.lives === 0){
       messages.newSingle('Game over')
-      game.lost = true
+      this.lost = true
+    } else {
+      this.stopMovement()
+      messages.newSingle('Life lost - Press space to continue', 'small')
     }
   }
   pillEaten(index){
     this.squares[index].classList.add('eaten')
-    scoreboard.up()
+    scoreboard.up(1)
     this.pillsRemaining--
     if (this.pillsRemaining === 0) this.initiateWin()
   }
-  removeSprite(spriteClass, spriteIndex){
-    //for the first step, there will not be an old sprite to remove
-    if(!spriteIndex) return
-    this.squares[spriteIndex].classList.remove(spriteClass, `${spriteClass}-left`, `${spriteClass}-right`, `${spriteClass}-up`, `${spriteClass}-down`)
+  bigPillEaten(index){
+    this.squares[index].classList.add('eaten')
+    scoreboard.up(10)
+    console.log('Starting bias inversion')
+    //initiate bias inversion for 30 clock counts
+    ghosts.forEach(ghost => ghost.bias.inverted = 30)
   }
   addSprite(spriteClass, spriteIndex, spriteVariant, spriteVariant2){
     this.squares[spriteIndex].classList.add(spriteClass, spriteVariant)
     if(spriteVariant2) this.squares[spriteIndex].classList.add(spriteVariant2)
   }
+  removeSprite(spriteClass, spriteIndex){
+    //for the first step, there will not be an old sprite to remove
+    if(!spriteIndex) return
+    this.squares[spriteIndex].classList.remove(spriteClass, `${spriteClass}-pilled`, `${spriteClass}-pilled-ending`, `${spriteClass}-left`, `${spriteClass}-right`, `${spriteClass}-up`, `${spriteClass}-down`)
+  }
   paintGrid(){
     //create the grid with width*width number of squares
+    this.grid.innerHTML = '<div class="message-overlay"></div>'
     for (let i = 0; i < this.gridWidth * this.gridWidth; i++) {
       const square = document.createElement('div')
       square.classList.add('grid-item')
@@ -475,12 +619,17 @@ class LevelBuilder{
     }
   }
   paintDecoration(){
-    this.walls.forEach(wall => this.squares[wall].classList.add('wall'))
-    this.prison.forEach(cell => this.squares[cell].classList.add('prison'))
+    this.levelData[this.currentLevel].walls.forEach(wall => this.squares[wall].classList.add('wall'))
+    this.levelData[this.currentLevel].prison.forEach(cell => this.squares[cell].classList.add('prison'))
+    this.levelData[this.currentLevel].bigPills.forEach(bigPill => {
+      this.squares[bigPill].classList.add('big-pill')
+      this.squares[bigPill].innerHTML = '<i class="far fa-dot-circle"></i>'
+    })
     this.squares.forEach( (cell, index) => {
       //if there is only 1 class defined, we know its grid-item, therefore it is an empty cell
       if(this.squares[index].classList.length === 1) {
         this.squares[index].classList.add('pill')
+        this.squares[index].classList.add('index'+index)
         this.squares[index].innerHTML = '<i class="fas fa-dot-circle"></i>'
         this.totalPills++
       }
@@ -509,8 +658,8 @@ class ScoreboardDefinition{
     this.updateLives()
     this.collectedElement.innerText = 'Collected'
   }
-  up(){
-    this.score++
+  up(newPoints){
+    this.score = this.score + newPoints
     this.scoreElement.innerText = `Score ${this.score}`
     //added in some high score functionality
     if (this.score > this.highScore) this.highScore = this.score
@@ -533,17 +682,19 @@ class ScoreboardDefinition{
 class MessageBar{
   constructor(messageBarClass){
     this.element = document.querySelector(messageBarClass)
+    this.newSingle('press space to begin', 'small')
   }
   newSequence(messages,timeBetween){
     messages.forEach( (message, index) => {
       setTimeout( () => this.newSingle(message), timeBetween * (index+1))
     })
   }
-  newSingle(message){
+  newSingle(message, size){
     this.element.innerHTML = ''
     const childDiv = document.createElement('div')
     childDiv.innerText = message
     childDiv.classList.add('message')
+    if(size) childDiv.classList.add(size)
     this.element.append(childDiv)
   }
 }

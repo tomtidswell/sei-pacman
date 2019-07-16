@@ -27,14 +27,14 @@ const levelData = [
   }
 ]
 
-window.addEventListener('DOMContentLoaded', init)
-
-document.fonts.ready.then(()=>{
-  //fade in the screen once the fonts have loaded
-  document.querySelector('body').classList.add('ready')
+window.addEventListener('DOMContentLoaded', ()=>{
+  //begin the initialisation once fonts have loaded
+  document.fonts.ready.then(()=> init())
 })
 
+
 function init() {
+  document.querySelector('body').classList.add('ready')
   game = new GameDefinition('.grid', 17, levelData)
   pacman = new Player('pacman',127)
   ghosts.push(new Ghost('binky',160,53,2))

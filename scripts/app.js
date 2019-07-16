@@ -27,14 +27,38 @@ const levelData = [
   }
 ]
 
+window.addEventListener('resize', sizeGrid)
+
+//begin the initialisation once fonts have loaded
 window.addEventListener('DOMContentLoaded', ()=>{
-  //begin the initialisation once fonts have loaded
-  document.fonts.ready.then(()=> init())
+  document.fonts.ready
+    .then(()=> init())
 })
 
 
+function sizeGrid(){
+
+  if(window.innerWidth < 510){
+    const w = window.innerWidth * 0.9 / 17
+    game.gridItems.forEach(item => {
+      if(item.classList.contains('grid-item')){
+        item.style.width = `${w}px`
+        item.style.height = `${w}px`
+      }
+    })
+  } else {
+    game.gridItems.forEach(item => {
+      if(item.classList.contains('grid-item')){
+        item.style.width = ''
+        item.style.height = ''
+      }
+    })
+  }
+
+}
+
+
 function init() {
-  document.querySelector('body').classList.add('ready')
   game = new GameDefinition('.grid', 17, levelData)
   pacman = new Player('pacman',127)
   ghosts.push(new Ghost('binky',160,53,2))
@@ -45,6 +69,8 @@ function init() {
   scoreboard = new ScoreboardDefinition('.scoreboard')
   messages = new MessageBar('.message-overlay')
   window.addEventListener('keydown',handleKeyDown)
+  sizeGrid()
+  document.querySelector('body').classList.add('ready')
 }
 
 function handleKeyDown(e){
@@ -476,6 +502,7 @@ class GameDefinition{
   constructor(gridClass, gridWidth, levelData){
     this.gridClass = gridClass
     this.grid = document.querySelector(this.gridClass)
+    this.gridItems = null
     this.gridWidth = gridWidth
     this.levelData = levelData
     //this.levelId = level
@@ -617,6 +644,7 @@ class GameDefinition{
       this.squares.push(square)
       this.grid.append(square)
     }
+    this.gridItems = this.grid.querySelectorAll('.grid-item')
   }
   paintDecoration(){
     this.levelData[this.currentLevel].walls.forEach(wall => this.squares[wall].classList.add('wall'))
@@ -656,7 +684,7 @@ class ScoreboardDefinition{
     this.collectedElement = this.boardElement.querySelector('.collected')
     this.scoreElement.innerText = `Score ${this.score}`
     this.updateLives()
-    this.collectedElement.innerText = 'Collected'
+    this.collectedElement.innerText = ' '
   }
   up(newPoints){
     this.score = this.score + newPoints

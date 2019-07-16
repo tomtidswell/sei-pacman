@@ -6,9 +6,11 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body {
+  width: 100%;
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;
@@ -20,6 +22,7 @@ body {
   margin: 10px auto;
   opacity: 0;
   background-image: url('../assets/bg2reduced.jpeg');
+
 }
 
 body.ready{
@@ -60,8 +63,8 @@ header h1{
 
 header h2{
   position: relative;
-  left:280px;
-  top:-70px;
+  left:50%;
+  top:-40%;
   font-family: 'Damion', cursive;
   margin: 0;
   color: pink;
@@ -86,6 +89,7 @@ main{
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 
 article.grid .message-overlay{
@@ -119,6 +123,7 @@ article.grid {
   background-color: rgba(0,0,0,0.5);
   box-shadow: -5px -5px 10px white, 5px 5px 100px white ;
   width: 510px;
+  max-width: 510px;
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 60px;
@@ -128,10 +133,12 @@ article.scoreboard {
   box-shadow: -5px -5px 100px white, 5px 5px 100px white ;
   height: 60px;
   width: 450px;
+  padding: 0 20px;
   display: flex;
   justify-content: space-around;
   align-items: center;
   margin-bottom: 30px;
+  font-size: 2em;
 }
 
 article.scoreboard .score{
@@ -139,7 +146,6 @@ article.scoreboard .score{
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-family: 'Kanit', sans-serif;
-  font-size: 2em;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -201,8 +207,8 @@ div.grid-item.binky:before, div.grid-item.pinky:before, div.grid-item.stinky:bef
   display: block;
   content: '';
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 100%;
+  height: 100%;
   z-index: 2;
 }
 div.grid-item.pinky:before {
@@ -257,8 +263,8 @@ div.grid-item.pacman.clyde.clyde-pilled-ending:before {
 .pacman:after{
   content: '';
   position: relative;
-  width: 25px;
-  height: 25px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background-color: #ffd915;
   clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);
@@ -299,28 +305,28 @@ div.grid-item.pacman.dead:after {
   60%{ clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideRight {
-  0% {  transform: translateX(-34px) rotate(0deg);
+  0% {  transform: translateX(-100%) rotate(0deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   100%{ transform: translateX(0) rotate(0deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideDown {
-  0% {  transform: translateY(-34px) rotate(90deg);
+  0% {  transform: translateY(-100%) rotate(90deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   100%{ transform: translateY(0) rotate(90deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideLeft {
-  0% {  transform: translateX(+34px) rotate(180deg);
+  0% {  transform: translateX(100%) rotate(180deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   100%{ transform: translateX(0) rotate(180deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
 }
 @keyframes slideUp {
-  0% {  transform: translateY(34px) rotate(270deg);
+  0% {  transform: translateY(100%) rotate(270deg);
         clip-path: polygon(100% 15%, 50% 50%, 100% 85%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   50%{  clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 100%, 0% 100%, 0% 0%, 100% 0%);}
   100%{ transform: translateY(0) rotate(270deg);
@@ -338,18 +344,65 @@ div.grid-item.pacman.dead:after {
 }
 
 @keyframes ghostSlideRight {
-  0% {  transform: translateX(-34px);}
+  0% {  transform: translateX(-100%);}
   100%{ transform: translateX(0);}
 }
 @keyframes ghostSlideDown {
-  0% {  transform: translateY(-34px);}
+  0% {  transform: translateY(-100%);}
   100%{ transform: translateY(0);}
 }
 @keyframes ghostSlideLeft {
-  0% {  transform: translateX(+34px);}
+  0% {  transform: translateX(100%);}
   100%{ transform: translateX(0);}
 }
 @keyframes ghostSlideUp {
-  0% {  transform: translateY(34px);}
+  0% {  transform: translateY(100%);}
   100%{ transform: translateY(0);}
+}
+
+@media only screen and (max-width: 600px) {
+  body{
+
+  }
+
+  header{
+    width: 300px;
+    height: 100px;
+  }
+  header p { font-size: 1em; }
+  header h1 { font-size: 4em; }
+  header h2 {
+    font-size: 1em;
+    left:40%;
+  }
+
+  header .pacman-title {
+    width: 90px;
+    height: 90px;
+  }
+
+  article.scoreboard {
+    width: 300px;
+    height: 40px;
+    font-size: 1.3em;
+    padding: 0 10px;
+  }
+
+  article.scoreboard div.grid-item,
+  article.scoreboard div.grid-item:after {
+    width: 20px;
+    height: 20px;
+  }
+
+  article.grid{
+    width: 90%;
+    margin-bottom: 0;
+  }
+
+}
+
+@media only screen and (max-width: 400px) {
+  div.grid-item.big-pill i{
+    font-size: 1.3em;
+  }
 }

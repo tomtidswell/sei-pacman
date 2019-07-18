@@ -71,7 +71,44 @@ function init() {
   window.addEventListener('keydown',handleKeyDown)
   sizeGrid()
   document.querySelector('body').classList.add('ready')
+  document.querySelectorAll('.d-pad > div > div').forEach(button => {
+    button.addEventListener('click', handlePadDown)
+  })
 }
+
+
+function handlePadDown(e){
+  console.log(e.target.classList[0])
+
+  //dont do anything if the game is already lost
+  if(game.lost) return
+
+  if(!pacman.movable){
+    game.startRound()
+    e.preventDefault()
+  }
+
+  switch (e.target.classList[0]) {
+    case 'right':
+      pacman.direction = rightMove(pacman.location) ? 'right' : pacman.direction
+      e.preventDefault()
+      break
+    case 'left':
+      pacman.direction = leftMove(pacman.location) ? 'left' : pacman.direction
+      e.preventDefault()
+      break
+    case 'up':
+      pacman.direction = upMove(pacman.location) ? 'up' : pacman.direction
+      e.preventDefault()
+      break
+    case 'down':
+      pacman.direction = downMove(pacman.location) ? 'down' : pacman.direction
+      e.preventDefault()
+      break
+  }
+
+}
+
 
 function handleKeyDown(e){
   //dont do anything if the game is already lost

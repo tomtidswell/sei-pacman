@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 function sizeGrid(){
 
-  if(window.innerWidth < 510){
+  if(window.innerWidth < 567){
     const w = window.innerWidth * 0.9 / 17
     game.gridItems.forEach(item => {
       if(item.classList.contains('grid-item')){
@@ -83,44 +83,41 @@ function handlePadDown(e){
   //dont do anything if the game is already lost
   if(game.lost) return
 
-  if(!pacman.movable){
-    game.startRound()
-    e.preventDefault()
-  }
+  if(!pacman.movable) game.startRound()
 
   switch (e.target.classList[0]) {
     case 'right':
       pacman.direction = rightMove(pacman.location) ? 'right' : pacman.direction
-      e.preventDefault()
       break
     case 'left':
       pacman.direction = leftMove(pacman.location) ? 'left' : pacman.direction
-      e.preventDefault()
       break
     case 'up':
       pacman.direction = upMove(pacman.location) ? 'up' : pacman.direction
-      e.preventDefault()
       break
     case 'down':
       pacman.direction = downMove(pacman.location) ? 'down' : pacman.direction
-      e.preventDefault()
       break
   }
-
 }
 
 
 function handleKeyDown(e){
   //dont do anything if the game is already lost
   if(game.lost) return
-  //if pacman isnt movable, and the spacebar is pressed, start the game
-  if(e.keyCode === 32 && !pacman.movable){
+  //if pacman isnt movable, and the spacebar or direction is pressed, start the game
+  if(!pacman.movable && (e.keyCode === 32 ||
+                         e.key === 'ArrowRight' ||
+                         e.key === 'ArrowLeft' ||
+                         e.key === 'ArrowUp' ||
+                         e.key === 'ArrowDown')){
     game.startRound()
     e.preventDefault()
   }
   //if pacman isnt movable, return
   if(!pacman.movable) return
-  //apply the new direction into pacmans direction parameter so it can be picked up next interval
+
+  //apply the new direction into pacmans direction parameter so it can be picked up next interval, or keep the existing direction if that direction isnt available
   switch (e.key) {
     case 'ArrowRight':
       pacman.direction = rightMove(pacman.location) ? 'right' : pacman.direction
@@ -747,7 +744,7 @@ class ScoreboardDefinition{
 class MessageBar{
   constructor(messageBarClass){
     this.element = document.querySelector(messageBarClass)
-    this.newSingle('press space to begin', 'small')
+    this.newSingle('press direction to begin', 'small')
   }
   newSequence(messages,timeBetween){
     messages.forEach( (message, index) => {

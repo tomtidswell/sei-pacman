@@ -295,6 +295,7 @@ div.grid-item.pacman.dead:after {
 }
 
 article.d-pad{
+  display: none;
   background-image: url('../assets/dpad.png');
   background-color: rgba(255,255,255,0.7);
   border-radius: 40%;
@@ -416,6 +417,10 @@ div.d-pad-row div{
   article.grid{
     width: 90%;
     margin-bottom: 0;
+  }
+
+  article.d-pad{
+    display: block;
   }
 
 }

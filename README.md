@@ -1,10 +1,6 @@
 # Pacman 
 
-<img src="assets/pacman-sprite.png" width="30" alt="pacman">
-<img src="assets/inky.gif" width="30" alt="ghost">
-<img src="assets/pinky.gif" width="30" alt="ghost">
-<img src="assets/blinky.gif" width="30" alt="ghost">
-<img src="assets/clyde.gif" width="30" alt="ghost">
+<img src="assets/pacman-sprite.png" width="30" alt="pacman"><img src="assets/inky.gif" width="30" alt="ghost"><img src="assets/pinky.gif" width="30" alt="ghost"><img src="assets/blinky.gif" width="30" alt="ghost"><img src="assets/clyde.gif" width="30" alt="ghost">
 
 **My take on the classic pacman arcade game.**
 

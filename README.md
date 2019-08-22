@@ -4,6 +4,8 @@
 
 **My take on the classic pacman arcade game.**
 
+This project was a challenge set by our General Assembly tutor whilst I was studying there. Check out the [brief we were set](pac-man.md).
+
 This was a solo project so all the work you see documented here is my own. The [first version](#v1.0) of this app was created in one week. I have been working on a version 2 on an ad-hoc basis, but this is still in progress.
 
 ![Pacman - start](assets/screenshots/start.gif)
@@ -130,7 +132,7 @@ The ghost is moved by toggling the class off from the current square and togglin
 
 <img src="assets/pacman-sprite.png" width="30" alt="pacman">
 
-Pacman has some complex animation, but his logic is simple. He is controlled either by direction arrows or the touch input. On each game turn, his Player class decides where he can move, and if he died. The proessing of a direction key will keep pacman moving in that direction for each turn until he hits a wall, dies or another direction is chosen.
+Pacman has some complex animation, but his logic is simple. He is controlled either by direction arrows or the touch input. On each game turn, his Player class decides where he can move, and if he died. The pressing of a direction key will keep pacman moving in that direction for each turn until he hits a wall, dies or another direction is chosen.
 
 Like the ghost sprite movement, the pacman sprite movement for each turn is controlled through the GameDefinition class below.
 

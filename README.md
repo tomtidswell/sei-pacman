@@ -1,12 +1,10 @@
-# Pacman 
-
 <img src="assets/pacman-sprite.png" width="30" alt="pacman"><img src="assets/inky.gif" width="30" alt="ghost"><img src="assets/pinky.gif" width="30" alt="ghost"><img src="assets/blinky.gif" width="30" alt="ghost"><img src="assets/clyde.gif" width="30" alt="ghost">
+
+# Pacman 
 
 **My take on the classic pacman arcade game.**
 
-This project was a challenge set by our General Assembly tutor whilst I was studying there. Check out the [brief we were set](pac-man.md).
-
-This was a solo project so all the work you see documented here is my own. The [first version](#v1.0) of this app was created in one week. I have been working on a version 2 on an ad-hoc basis, but this is still in progress.
+This project was a challenge set by our General Assembly tutor whilst I was studying there. Check out the [brief we were set](pac-man.md). This was a solo project so all the work you see documented here is my own. The [first version](#v1.0) of this app was created in one week. I have been working on a version 2 on an ad-hoc basis since I finished my course but this is still in progress.
 
 ![Pacman - start](assets/screenshots/start.gif)
 

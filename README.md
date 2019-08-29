@@ -29,14 +29,6 @@ This project was a challenge set by our General Assembly tutor whilst I was stud
     - I went to great lengths to make sure I never coded the same thing twice. This led me to create five main components as js classes: Pacman, Ghost, Game control, Scoreboard, Player messaging
     - As soon as the classes are instantiated, they operate independently and contain their own data requred to function. For more detail, see the [overview](#Overview) section
 
-## Future Improvements
-
-With future [versions](#versioning), I intend to add the following functionality:
-
-* Real level progression 
-* Better touch control for mobile view
-* Personalised ghost navigation
-
 
 ## Overview
 
@@ -171,6 +163,27 @@ One week project, ended with a demo and presentation. MVP was complete and style
 * Game grid responsive scaling for mobile view
 * Touch input for mobile view
 * Improved animations and simplified CSS code
+
+## Challenges
+The ghost logic for this project was tough. I didn't want to be too influenced by other developer's approaches to the challenge so I found devising the logic for it very time consuming, but ultimately very rewarding once the game took shape and the ghosts seemed to move with intelligence.
+
+
+## Wins
+* I love the styling of this game. I took inspiration from 80s era posters and video game box artwork. The overall polish I managed to achieve is very satisfying
+* I'm pleased at how clean the code is for one of my early projects. I focussed on ensuring modularity and keeping the code "stupid simple"
+
+
+## Key Learning
+* How best to use class constructors when building an object type structure
+* How to approach the challenge of building a complex game like this. I learned to be very structured with my time, and also how to prioritise the different aspects of the functionality. I didn't get distracted with anything non-fundamental to the product I wanted to produce
+
+
+## Future Improvements
+With future [versions](#versioning), I intend to add the following functionality:
+
+* Real level progression 
+* Better touch control for mobile view
+* Personalised ghost navigation
 
 
 

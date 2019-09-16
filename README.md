@@ -1,4 +1,4 @@
-<img src="assets/pacman-sprite.png" width="30" alt="pacman"><img src="assets/inky.gif" width="30" alt="ghost"><img src="assets/pinky.gif" width="30" alt="ghost"><img src="assets/blinky.gif" width="30" alt="ghost"><img src="assets/clyde.gif" width="30" alt="ghost">
+<img src="readme/pacman-sprite.png" width="30" alt="pacman"><img src="readme/inky.gif" width="30" alt="ghost"><img src="readme/pinky.gif" width="30" alt="ghost"><img src="readme/blinky.gif" width="30" alt="ghost"><img src="readme/clyde.gif" width="30" alt="ghost">
 
 # Pacman 
 
@@ -6,7 +6,7 @@
 
 This project was a challenge set by our General Assembly tutor whilst I was studying there. Check out the [brief we were set](pac-man.md). This was a solo project so all the work you see documented here is my own. The [first version](#v1.0) of this app was created in one week. I have been working on a version 2 on an ad-hoc basis since I finished my course but this is still in progress.
 
-![Pacman - start](assets/screenshots/start.gif)
+![Pacman - start](readme/screenshots/start.gif)
 
 ## Built With
 
@@ -34,7 +34,7 @@ This project was a challenge set by our General Assembly tutor whilst I was stud
 
 I wanted to give the game a lovely 80's nostalgia feel, so I maxed out the neon and metallic styling. Using shadowing and linear gradients, I was able to produce that retro experience:
 
-![Title](assets/screenshots/title.png)
+![Title](readme/screenshots/title.png)
 
 ### The grid
 
@@ -101,7 +101,7 @@ And to make him munch as he moves, the clip path is also part of the movement an
 
 The ghosts were the most difficult challenge. They needed enough intelligence so they didnt get stuck in corners, and so they could still chase pacman if he moved erratically or hid behind a wall.
 
-<img src="assets/blinky.gif" width="30" alt="ghost">
+<img src="readme/blinky.gif" width="30" alt="ghost">
 
 I didnt want to be influenced by how other people had solved this problem, so I avoided googling, but I had already researched the ghosts personalities. Once I realised that the ghosts all behaved differently, that was enough for me to begin the challenge. I approached it by giving the ghosts independence, creating a ghost class where each would operate completely independently on the grid. At a basic level, the ghosts have a heirachy of moves available to them, but the complexity is built up over how they decide which option to take:
 
@@ -120,7 +120,7 @@ The ghost is moved by toggling the class off from the current square and togglin
 
 ### Pacman
 
-<img src="assets/pacman-sprite.png" width="30" alt="pacman">
+<img src="readme/pacman-sprite.png" width="30" alt="pacman">
 
 Pacman has some complex animation, but his logic is simple. He is controlled either by direction arrows or the touch input. On each game turn, his Player class decides where he can move, and if he died. The pressing of a direction key will keep pacman moving in that direction for each turn until he hits a wall, dies or another direction is chosen.
 

@@ -1,45 +1,69 @@
+import './style.scss'
+import axios from 'axios'
+import Loader from './classes/loader'
 // TODO
 // Add fruit/sweeties which can be collected
 // Add clockwise logic for ghosts
-// Allow level progression
+// Allow level progression 
+
 
 const ghosts = []
 let pacman = null
 let scoreboard = null
 let messages = null
 let game = null
+let levelData = []
+let highScores = []
 
-//TODO - auto level progression
-const levelData = [
-  //Level 0 - This is a medium difficulty level
-  {
-    name: 'level0',
-    prison: [160, 161, 162, 177, 178, 179],
-    bigPills: [53, 65, 225, 233],
-    walls: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 36, 37, 39, 40, 41, 43, 44, 45, 47, 48, 51, 54, 56, 58, 60, 62, 64, 67, 68, 69, 70, 71, 75, 77, 81, 82, 83, 84, 85, 90, 96, 101, 102, 104, 105, 107, 108, 110, 112, 113, 115, 116, 118, 136, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 151, 152, 159, 163, 170, 172, 173, 174, 176, 180, 182, 183, 184, 186, 187, 193, 194, 196, 197, 203, 204, 206, 207, 208, 216, 217, 218, 220, 221, 224, 229, 234, 237, 238, 239, 241, 242, 244, 245, 246, 247, 248, 250, 251, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
-  },
-  //Level 1 - this is a pretty hard level!!!!
-  {
-    name: 'level1',
-    prison: [160, 161, 162, 177, 178, 179],
-    bigPills: [53, 65, 225, 233],
-    walls: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 33, 34, 36, 37, 38, 40, 41, 43, 44, 46, 47, 48, 50, 51, 55, 58, 60, 63, 67, 68, 70, 72, 75, 77, 80, 82, 84, 85, 86, 87, 99, 100, 101, 102, 103, 104, 106, 107, 108, 109, 110, 111, 112, 113, 114, 116, 117, 118, 119, 120, 121, 133, 134, 135, 140, 141, 142, 143, 144, 145, 146, 147, 148, 153, 154, 155, 159, 163, 167, 168, 169, 170, 171, 172, 174, 175, 176, 180, 181, 182, 184, 185, 186, 187, 188, 189, 193, 194, 196, 197, 201, 202, 203, 204, 205, 206, 207, 217, 218, 219, 220, 221, 227, 228, 229, 230, 231, 237, 238, 239, 240, 241, 243, 244, 248, 249, 251, 252, 253, 254, 255, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288]
-  }
-]
+const loadModal = new Loader('.loader', '#loading-text')
 
-window.addEventListener('resize', sizeGrid)
+const domProm = new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, false))
+const fontsProm = document.fonts.ready
+const levelsProm = new Promise((resolve, reject) => axios.get('/api/levels').then(resolve).catch(reject))
+const scoresProm = axios.get('/api/scores')
+// const timeout = new Promise(resolve => setTimeout(resolve, 3000, 'foo'))
 
-//begin the initialisation once fonts have loaded
-window.addEventListener('DOMContentLoaded', ()=>{
-  document.fonts.ready
-    .then(()=> init())
-})
+domProm.then(()=>loadModal.msg('Building the display...'), ()=>loadModal.error('DOM'))
+fontsProm.then(()=>loadModal.msg('Formatting text rendering...'), err=>loadModal.error('fonts', err))
+levelsProm.then(()=>loadModal.msg('Loading level data...'), err=>loadModal.error('levels', err))
+scoresProm.then(()=>loadModal.msg('Fetching high scores...'), err=>loadModal.error('scores', err))
+// timeout.then(()=>loadModal.msg('Complete.'), ()=>loadModal.error('timeout'))
+
+Promise.all([domProm, fontsProm, levelsProm, scoresProm])
+  //all are ready
+  .then(res => {
+    loadModal.msg('ALL READY!')
+    levelData = res[2].data
+    highScores = res[3].data
+    setTimeout(init, 500)
+    setTimeout(()=>loadModal.complete(), 2000)
+  })
+  .catch(()=>{
+    loadModal.msg('LOAD HALTING.')
+  })
+
+function init() {
+  game = new GameDefinition('.squares', 17, levelData)
+  pacman = new Player('pacman', 127)
+  ghosts.push(new Ghost('binky', 160, 53, 2))
+  ghosts.push(new Ghost('pinky', 162, 65, 6))
+  ghosts.push(new Ghost('stinky', 177, 240, 10))
+  ghosts.push(new Ghost('clyde', 179, 252, 14))
+  game.paintDecoration() //draw the decorations once we initialised the sprites
+  scoreboard = new ScoreboardDefinition('.scoreboard', '.high-scores', highScores, '.capture-name')
+  messages = new MessageBar('.message-overlay')
+  sizeGrid()
+  window.addEventListener('resize', sizeGrid)
+  window.addEventListener('keydown', handleKeyDown)
+  document.querySelectorAll('.d-pad > div > div')
+    .forEach(button => button.addEventListener('click', handlePadDown))
+}
 
 
 function sizeGrid(){
 
   if(window.innerWidth < 567){
-    const w = window.innerWidth * 0.9 / 17
+    const w = window.innerWidth / 17
     game.gridItems.forEach(item => {
       if(item.classList.contains('grid-item')){
         item.style.width = `${w}px`
@@ -55,25 +79,6 @@ function sizeGrid(){
     })
   }
 
-}
-
-
-function init() {
-  game = new GameDefinition('.grid', 17, levelData)
-  pacman = new Player('pacman',127)
-  ghosts.push(new Ghost('binky',160,53,2))
-  ghosts.push(new Ghost('pinky',162,65,6))
-  ghosts.push(new Ghost('stinky',177,240,10))
-  ghosts.push(new Ghost('clyde',179,252,14))
-  game.paintDecoration() //draw the decorations once we initialised the sprites
-  scoreboard = new ScoreboardDefinition('.scoreboard')
-  messages = new MessageBar('.message-overlay')
-  window.addEventListener('keydown',handleKeyDown)
-  sizeGrid()
-  document.querySelector('body').classList.add('ready')
-  document.querySelectorAll('.d-pad > div > div').forEach(button => {
-    button.addEventListener('click', handlePadDown)
-  })
 }
 
 
@@ -539,10 +544,6 @@ class GameDefinition{
     this.gridItems = null
     this.gridWidth = gridWidth
     this.levelData = levelData
-    //this.levelId = level
-    //this.walls = walls
-    //this.prison = prison
-    //this.bigPills = bigPills
     this.currentLevel = 0
     this.squares = []
     this.lost = false
@@ -623,6 +624,7 @@ class GameDefinition{
     if(this.roundLost) return
     this.stopMovement()
     messages.newSingle('Level Complete')
+    setTimeout(()=>this.exitGame(), 2000)
   }
   initiateLoss(lossTrigger){
     //check that we havent already lost the game, or this round
@@ -640,10 +642,17 @@ class GameDefinition{
     if(scoreboard.lives === 0){
       messages.newSingle('Game over')
       this.lost = true
+      setTimeout(()=>this.exitGame(), 2000)
     } else {
       this.stopMovement()
       messages.newSingle('Life lost - Press space to continue', 'small')
     }
+  }
+  exitGame(){
+    this.stopMovement()
+    this.grid.innerHTML = ''
+    document.querySelector('.d-pad').classList.add('hide')
+    scoreboard.captureName()
   }
   pillEaten(index){
     this.squares[index].classList.add('eaten')
@@ -669,7 +678,7 @@ class GameDefinition{
   }
   paintGrid(){
     //create the grid with width*width number of squares
-    this.grid.innerHTML = '<div class="message-overlay"></div>'
+    this.grid.innerHTML = ''
     for (let i = 0; i < this.gridWidth * this.gridWidth; i++) {
       const square = document.createElement('div')
       square.classList.add('grid-item')
@@ -707,24 +716,27 @@ class GameDefinition{
 }
 
 class ScoreboardDefinition{
-  constructor(scoreboardClass){
+  constructor(scoreboardClass, highScoresClass, highScores, formClass){
     this.score = 0
-    this.highScore = 0
+    this.highScores = highScores
+    this.highScore = highScores[0].value
     this.lives = 3
     this.gameLost = false
+    this.playerName = null
     this.boardElement = document.querySelector(scoreboardClass)
+    this.highScoresElement = document.querySelector(highScoresClass)
+    this.formElement = document.querySelector(formClass)
     this.scoreElement = this.boardElement.querySelector('.score')
+    this.highElement = this.boardElement.querySelector('.high')
     this.livesElement = this.boardElement.querySelector('.lives')
-    this.collectedElement = this.boardElement.querySelector('.collected')
-    this.scoreElement.innerText = `Score ${this.score}`
     this.updateLives()
-    this.collectedElement.innerText = ' '
+    this.up(0)
   }
   up(newPoints){
     this.score = this.score + newPoints
     this.scoreElement.innerText = `Score ${this.score}`
-    //added in some high score functionality
     if (this.score > this.highScore) this.highScore = this.score
+    this.highElement.innerText = `High ${this.highScore}`
   }
   reset(){
     this.score = 0
@@ -739,6 +751,58 @@ class ScoreboardDefinition{
       this.livesElement.append(life)
     }
   }
+  captureName(){
+    messages.newSequence(['Enter the hall of fame', ''], 1000)
+    this.formElement.classList.remove('hide')
+    this.formElement.addEventListener('submit', (e)=>this.submitForm(e))
+  }
+  submitForm(e){
+    e.preventDefault()
+    this.formElement.classList.add('hide')
+    this.playerName = e.target.name.value
+    console.log('hello', this.playerName)
+    this.submitScore()
+  }
+  submitScore(){
+    if (!this.playerName) this.captureName()
+    else {
+      //update the back end with the new score
+      axios.post('/api/scores', { name: this.playerName, value: this.score })
+        .then(({ data }) => {
+          //capture the data as the new high scores
+          this.highScores = data
+          this.showTable()
+        })
+    }
+  }
+  showTable(){
+    console.log('Showing the table now!!')
+    console.log('high scores:', this.highScores)
+
+    if (this.score === this.highScore) messages.newSequence(['New high score', ''], 1000)
+    
+    //unhide the scores
+    this.highScoresElement.classList.remove('hide')
+    
+    //build the score table
+    const tableBody = this.highScoresElement.querySelector('tbody')
+    //build table
+    this.highScores.forEach((score, i) => {
+      const scoreRow = document.createElement('tr')
+      const rank = document.createElement('td')
+      const value = document.createElement('td')
+      const name = document.createElement('td')
+      rank.innerHTML = i + 1
+      name.innerHTML = score.name
+      value.innerHTML = score.value
+      scoreRow.append(rank)
+      scoreRow.append(value)
+      scoreRow.append(name)
+      tableBody.append(scoreRow)
+    })
+    
+
+  }
 }
 
 class MessageBar{
@@ -748,7 +812,7 @@ class MessageBar{
   }
   newSequence(messages,timeBetween){
     messages.forEach( (message, index) => {
-      setTimeout( () => this.newSingle(message), timeBetween * (index+1))
+      setTimeout(()=>this.newSingle(message), timeBetween * (index+1))
     })
   }
   newSingle(message, size){
@@ -760,3 +824,4 @@ class MessageBar{
     this.element.append(childDiv)
   }
 }
+

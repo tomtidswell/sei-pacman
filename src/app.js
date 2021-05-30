@@ -1,6 +1,7 @@
 import './style.scss'
 import axios from 'axios'
 import Loader from './classes/loader'
+import { scores, levels } from './assets/seedsData'
 // TODO
 // Add fruit/sweeties which can be collected
 // Add clockwise logic for ghosts
@@ -19,22 +20,22 @@ const loadModal = new Loader('.loader', '#loading-text')
 
 const domProm = new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, false))
 const fontsProm = document.fonts.ready
-const levelsProm = new Promise((resolve, reject) => axios.get('/api/levels').then(resolve).catch(reject))
-const scoresProm = axios.get('/api/scores')
+// const levelsProm = new Promise((resolve, reject) => axios.get('/api/levels').then(resolve).catch(reject))
+// const scoresProm = axios.get('/api/scores')
 // const timeout = new Promise(resolve => setTimeout(resolve, 3000, 'foo'))
 
 domProm.then(()=>loadModal.msg('Building the display...'), ()=>loadModal.error('DOM'))
 fontsProm.then(()=>loadModal.msg('Formatting text rendering...'), err=>loadModal.error('fonts', err))
-levelsProm.then(()=>loadModal.msg('Loading level data...'), err=>loadModal.error('levels', err))
-scoresProm.then(()=>loadModal.msg('Fetching high scores...'), err=>loadModal.error('scores', err))
+// levelsProm.then(()=>loadModal.msg('Loading level data...'), err=>loadModal.error('levels', err))
+// scoresProm.then(()=>loadModal.msg('Fetching high scores...'), err=>loadModal.error('scores', err))
 // timeout.then(()=>loadModal.msg('Complete.'), ()=>loadModal.error('timeout'))
 
-Promise.all([domProm, fontsProm, levelsProm, scoresProm])
+Promise.all([domProm, fontsProm ])
   //all are ready
-  .then(res => {
+  .then(() => {
     loadModal.msg('ALL READY!')
-    levelData = res[2].data
-    highScores = res[3].data
+    levelData = levels
+    highScores = scores
     setTimeout(init, 500)
     setTimeout(()=>loadModal.complete(), 2000)
   })

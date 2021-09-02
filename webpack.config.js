@@ -6,8 +6,8 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 module.exports = {
   entry: './src/app.js',
   output: {
-    path: path.resolve('dist'),
-    filename: 'bundle.js'
+    path: __dirname + '/dist',
+    filename: 'index_bundle.js'
   },
   module: {
     rules: [
@@ -24,7 +24,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: path.resolve('src'),
+    contentBase: __dirname + '/src',
     hot: true,
     open: true,
     port: 8000,
